@@ -1,0 +1,20 @@
+﻿<Properties StartupItem="EventDebugEE/Spider.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="EventDebugEE/Lobby.cs">
+    <Files>
+      <File FileName="EventDebugEE/Core.cs" Line="19" Column="19" />
+      <File FileName="EventDebugEE/Crawler.cs" Line="29" Column="29" />
+      <File FileName="EventDebugEE/Pool.cs" Line="16" Column="16" />
+      <File FileName="EventDebugEE/ObjectPool.cs" Line="4" Column="4" />
+      <File FileName="EventDebugEE/Connect.cs" Line="67" Column="67" />
+      <File FileName="EventDebugEE/Lobby.cs" Line="3" Column="3" />
+      <File FileName="EventDebugEE/EE_Stream.cs" Line="64" Column="64" />
+      <File FileName="EventDebugEE/Config.cs" Line="38" Column="38" />
+      <File FileName="EventDebugEE/CancellationTokenExtensions.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
