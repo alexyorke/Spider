@@ -13,7 +13,7 @@ namespace Spider
         /// </summary>
         public static void AutoAdjust()
         {
-            Console.WriteLine("Filling worker pool...");
+            Console.WriteLine("[INFO] Filling worker pool...");
             while (Core.LobbyNew == null)
             {
                 Thread.Sleep(250);
@@ -31,7 +31,8 @@ namespace Spider
 
                     if (!crawlerTasks.ContainsKey(roomKey) || crawlerTasks.Count == 0)
                     {
-                        Console.WriteLine("Creating a new crawler!");
+						Thread.Sleep (3000);
+                        Console.WriteLine("[INFO] Creating a new crawler!");
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(roomKey, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();
@@ -41,12 +42,12 @@ namespace Spider
                 {
                     if (Core.CrawlerTasks.ContainsKey(roomKey))
                     {
-                        Console.WriteLine("Removing a crawler!");
+                        Console.WriteLine("[INFO] Removing a crawler!");
                         Core.RemoveCrawler(roomKey);
                     }
                 }
             }
-            Console.WriteLine("Time: " + DateTime.Now);
+
         }
     }
 }

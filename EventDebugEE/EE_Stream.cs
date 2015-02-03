@@ -29,7 +29,7 @@ namespace Spider
             var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             Directory.CreateDirectory(string.Format("/media/alex/EOS_DIGITAL/spider_levels/{0}_{1}", currentDate,
                 ranNumber));
-            Console.WriteLine("FILEPATH:" +
+            Console.WriteLine("[INFO] Writing to: " +
                               string.Format("/media/alex/EOS_DIGITAL/spider_levels/{0}_{1}/{2}", currentDate, ranNumber,
                                   worldId));
             Fs =
@@ -60,9 +60,9 @@ namespace Spider
             //This function is taking the majority of the CPU time.
             Sw.WriteLine(JsonConvert.SerializeObject(m) + Environment.NewLine +
                 secondsElapsed);
-            var totalEvents = Core.TotalEvents;
-            Interlocked.Increment(ref totalEvents);
-            Core.TotalEvents = totalEvents;
+            //var totalEvents = Core.TotalEvents;
+			Core.IncrementDoneCounter ();
+            //Core.TotalEvents = totalEvents;
             //return sw;
         }
 

@@ -16,6 +16,8 @@ namespace Spider
         /// </summary>
         public static void List()
         {
+			List<string> blackList = new List<string> ();
+			blackList.Add ("PW3tNZWPXQbkI");
             var waitForLobby = new AutoResetEvent(false);
             var connection = Core.pool.GetObject();
             var cli = connection.Client;
@@ -30,7 +32,9 @@ namespace Spider
                     where roomPrefixes.Contains(roomStart)
                     select t)
                 {
+						if (!blackList.Contains(t.Id)) {
                     lobby.Add(t.Id, t.OnlineUsers);
+						}
                 }
 
                 // return client back to the cold, dark, pool.
