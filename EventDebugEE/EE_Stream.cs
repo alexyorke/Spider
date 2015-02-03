@@ -27,14 +27,14 @@ namespace Spider
             // make directory
 
             var desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            Directory.CreateDirectory(string.Format("/media/alex/EOS_DIGITAL/spider_levels/{0}_{1}", currentDate,
+            Directory.CreateDirectory(string.Format("/media/USERNAME/EOS_DIGITAL/spider_levels/{0}_{1}", currentDate,
                 ranNumber));
             Console.WriteLine("[INFO] Writing to: " +
-                              string.Format("/media/alex/EOS_DIGITAL/spider_levels/{0}_{1}/{2}", currentDate, ranNumber,
+                              string.Format("/media/USERNAME/EOS_DIGITAL/spider_levels/{0}_{1}/{2}", currentDate, ranNumber,
                                   worldId));
             Fs =
                 new FileStream(
-					string.Format("/media/alex/EOS_DIGITAL/spider_levels/{0}_{1}/{2}", currentDate, ranNumber,
+					string.Format("/media/USERNAME/EOS_DIGITAL/spider_levels/{0}_{1}/{2}", currentDate, ranNumber,
                         worldId), FileMode.Append, FileAccess.Write);
             Sw = new StreamWriter(Fs);
         }
