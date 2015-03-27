@@ -124,7 +124,18 @@ namespace Spider
                 }
             }
             Sw.Flush();
-            //_dataToWrite = null; // trying to fix memory issue
+            Sw.Close();
+            try
+            {
+                Fs.Flush();
+                Fs.Close();
+            }
+            catch (Exception e)
+            {
+                
+
+            }
+            _dataToWrite = null; // trying to fix memory issue
         }
 
         /// <summary>
@@ -151,10 +162,15 @@ namespace Spider
         /// </summary>
         public void Shutdown(CancellationToken cancelToken)
         {
-            Sw.Flush();
-            Fs.Flush();
-            //Sw.Close();
-            //Fs.Close();
+            try
+            {
+                Sw.Flush();
+                Fs.Flush();
+            }
+            catch (Exception e)
+            {
+                // may have already been closed, don't worry about it if they were.
+            }
             CancelTokenGlobal = cancelToken;
             try
             {

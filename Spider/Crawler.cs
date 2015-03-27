@@ -61,7 +61,7 @@ namespace Spider
             GlobalConnection.Disconnect();
             stream.Shutdown(cancelToken);
 
-            Core.Pool.PutObject(GlobalConnect);
+            //Core.Pool.PutObject(GlobalConnect);
             cancelToken.ThrowIfCancellationRequested();
         }
 
@@ -187,6 +187,7 @@ namespace Spider
                 if (cancelToken.IsCancellationRequested)
                 {
                     Shutdown(cancelToken, eeEvent);
+                    eeEvent = null; // possible solution to memory issue
                 }
             };
         }
