@@ -38,10 +38,9 @@ namespace Spider
             var currentDate = DateTime.Now.ToString("yyyy-M-d");
 
             // random string from stackoverflow
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
             var result = new string(
-                Enumerable.Repeat(chars, 8)
+                Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 8)
                     .Select(s => s[_rnd.Next(s.Length)])
                     .ToArray());
             var uniqueString = result;
