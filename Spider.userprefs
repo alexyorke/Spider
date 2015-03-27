@@ -1,12 +1,8 @@
-﻿<Properties StartupItem="EventDebugEE/Spider.csproj">
+﻿<Properties StartupItem="Spider/Spider.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="EventDebugEE/Connect.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Spider/Crawler.cs">
     <Files>
-      <File FileName="EventDebugEE/Connect.cs" Line="6" Column="6" />
-      <File FileName="EventDebugEE/Core.cs" Line="1" Column="1" />
-      <File FileName="EventDebugEE/Crawler.cs" Line="1" Column="1" />
-      <File FileName="EventDebugEE/Pool.cs" Line="1" Column="1" />
-      <File FileName="EventDebugEE/EE_Stream.cs" Line="1" Column="1" />
+      <File FileName="Spider/Crawler.cs" Line="11" Column="34" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

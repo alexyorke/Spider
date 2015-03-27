@@ -5,12 +5,14 @@ using PlayerIOClient;
 namespace Spider
 {
     /// <summary>
-    /// Class Connect.
+    ///     Class Connect.
     /// </summary>
     public class Connect
     {
+        private static readonly Random Random = new Random();
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="Connect"/> class.
+        ///     Initializes a new instance of the <see cref="Connect" /> class.
         /// </summary>
         public Connect()
         {
@@ -18,24 +20,31 @@ namespace Spider
         }
 
         /// <summary>
-        /// Gets the client.
+        ///     Gets the client.
         /// </summary>
         /// <value>The client.</value>
         public Client Client { get; private set; }
 
         /// <summary>
-        /// Logs the on.
+        ///     Logs the on.
         /// </summary>
         /// <returns>Client.</returns>
         private Client LogOn()
         {
             // emails may be randomized in the future.
-            
+
             var waitForLogOn = new AutoResetEvent(false);
-			PlayerIO.QuickConnect.SimpleConnect(Config.GameId, Config.email, Config.password, null,
+            var email = Config.Email;
+
+            /*var randomNumber = Random.Next(0, 11);
+            switch (randomNumber)
+            {
+                default:
+                    email =  "user@example.com";
+            }*/
+            PlayerIO.QuickConnect.SimpleConnect(Config.GameId, (email), (Config.Password), null,
                 delegate(Client localClient)
                 {
-                    Console.WriteLine("[INFO] Successfully produced a client object.");
                     // finished logging in
                     Client = localClient;
                     waitForLogOn.Set();

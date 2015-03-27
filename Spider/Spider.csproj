@@ -5,9 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{9D66CD19-DB0D-434E-888C-6F61BA18ED1F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>EventDebugEE</RootNamespace>
-    <AssemblyName>EventDebugEE</AssemblyName>
+    <RootNamespace>Spider</RootNamespace>
+    <AssemblyName>Spider</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,12 +33,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="PlayerIOClient">
-      <HintPath>..\packages\PlayerIOClient-Signed.2.3.6.0\lib\PlayerIOClient.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PlayerIOClient">
+      <HintPath>..\packages\PlayerIOClient-Signed.3.1.0\lib\PlayerIOClient.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -50,6 +54,10 @@
     <Compile Include="Config.cs" />
     <Compile Include="EE_Stream.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="Humanizer.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Priority.cs" />
+    <Compile Include="LogPriority.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
