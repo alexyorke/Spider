@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using PlayerIOClient;
 
@@ -9,8 +8,6 @@ namespace Spider
     /// </summary>
     public class Connect
     {
-        private static readonly Random Random = new Random();
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="Connect" /> class.
         /// </summary>
@@ -36,12 +33,7 @@ namespace Spider
             var waitForLogOn = new AutoResetEvent(false);
             var email = Config.Email;
 
-            /*var randomNumber = Random.Next(0, 11);
-            switch (randomNumber)
-            {
-                default:
-                    email =  "user@example.com";
-            }*/
+            
             PlayerIO.QuickConnect.SimpleConnect(Config.GameId, (email), (Config.Password), null,
                 delegate(Client localClient)
                 {
