@@ -108,8 +108,9 @@ namespace Spider
         {
             Logger.Log(LogPriority.Debug, "Initializing crawler...");
             var cancelToken = new CancellationTokenSource();
-            var connector = Pool.GetObject();
-
+            //var connector = Pool.GetObject();
+            var connector = new Connect();
+            
             var crawlerTask = Task.Factory.StartNew(state =>
             {
                 var crawler = new Crawler(connector);

@@ -20,7 +20,9 @@ namespace Spider
                 "PWw5SwzgEXb0I\nPWjyTtlTPjbkI\nPWdBHWybO0a0I\nPWADSqksB-a0I\nPWAGTxuoOLa0I\nPW6tE27AhqbkI\nPWqEDKY7EDb0I\nPWZaOSj2GFbkI\nPW7huwlwUFbEI";
                 //[TC] goeyfun bot
             var waitForLobby = new AutoResetEvent(false);
-            var connection = Core.Pool.GetObject();
+            //var connection = Core.Pool.GetObject();
+            var connection = new Connect();
+            
             var cli = connection.Client;
             var lobby = new Dictionary<string, int>();
 
