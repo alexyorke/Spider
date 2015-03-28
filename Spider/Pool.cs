@@ -35,9 +35,9 @@ namespace Spider
                     (room.Key == "PWbnzNQNi4a0I" && room.Value > MinimumUsers))
                     // 200 lava minigames, super mario bros (featured), coin level (featured)
                 {
-                    var crawlerTasks = Core.CrawlerTasks;
 
-                    if (!crawlerTasks.ContainsKey(roomKey) || crawlerTasks.Count == 0)
+
+                    if (!Core.CrawlerTasks.ContainsKey(roomKey) || Core.CrawlerTasks.Count == 0)
                     {
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(roomKey, createCrawlerHandle);
@@ -49,14 +49,11 @@ namespace Spider
                 }
                 else
                 {
-                    if (Core.CrawlerTasks.ContainsKey(roomKey))
+                    if (Core.CrawlerTasks.ContainsKey(roomKey) && room.Value >= (MinimumUsers - Buffer))
                     {
-                        if (room.Value < (MinimumUsers - Buffer))
-                        {
-                            // add a bit of a buffer so that there aren't too many fragments
-                            Logger.Log(LogPriority.Debug, "Removing a crawler");
-                            Core.RemoveCrawler(roomKey);
-                        }
+                        // add a bit of a buffer so that there aren't too many fragments
+                        Logger.Log(LogPriority.Debug, "Removing a crawler");
+                        Core.RemoveCrawler(roomKey);
                     }
                 }
             }

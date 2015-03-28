@@ -133,7 +133,7 @@ namespace Spider
                     GlobalConnection.Send("init");
                     GlobalConnection.Send("init2");
 
-
+                    
                     GlobalConnection.OnDisconnect += delegate(object sender2, string message)
                     {
                         if (message.Contains("receivedBytes == 0"))
@@ -167,7 +167,6 @@ namespace Spider
 
                         if (!cancelToken.IsCancellationRequested)
                         {
-                            Console.WriteLine("CANCEL FROM DISCONNECT");
                             var t = Task.Run(async delegate
                             {
                                 Shutdown(cancelToken, eeEvent);
@@ -187,7 +186,7 @@ namespace Spider
                 if (cancelToken.IsCancellationRequested)
                 {
                     Shutdown(cancelToken, eeEvent);
-                    eeEvent = null; // possible solution to memory issue
+                    //eeEvent = null; // possible solution to memory issue
                 }
             };
         }

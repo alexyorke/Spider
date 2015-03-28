@@ -59,7 +59,7 @@ namespace Spider
                     worldId), FileMode.Append, FileAccess.Write);
             Sw = new StreamWriter(Fs) {AutoFlush = false};
 
-            DownloadMinimap(worldId, currentDate, uniqueString);
+            //DownloadMinimap(worldId, currentDate, uniqueString);
         }
 
         /// <summary>
@@ -102,6 +102,7 @@ namespace Spider
                 var data = _dataToWrite.Take();
                 foreach (var anEvent in data)
                 {
+                    Core.IncrementDoneCounter();
                     Sw.WriteLine(JsonConvert.SerializeObject(anEvent));
                 }
                 if (CancelTokenGlobal.IsCancellationRequested)
@@ -120,22 +121,18 @@ namespace Spider
                 var data = _dataToWrite.Take();
                 foreach (var anEvent in data)
                 {
+                    Core.IncrementDoneCounter();
                     Sw.WriteLine(JsonConvert.SerializeObject(anEvent));
                 }
             }
             Sw.Flush();
-            Sw.Close();
-            try
-            {
+            
+      
                 Fs.Flush();
-                Fs.Close();
-            }
-            catch (Exception e)
-            {
+                //Fs.Close(); // closes sw too
                 
-
-            }
-            _dataToWrite = null; // trying to fix memory issue
+           
+            //_dataToWrite = null; // trying to fix memory issue
         }
 
         /// <summary>
@@ -148,12 +145,8 @@ namespace Spider
            
                 var x = new Dictionary<Message,
                     double> {{m, secondsElapsed}};
-            _dataToWrite?.Add(x); // check if _dataToWrite is not null then write event.
-                                  // _dataToWrite is set to null because of a memory leak
-                                  // occuring when the event stream is shutdown
-            // queue processes it in background......
-
-                Core.IncrementDoneCounter();
+            _dataToWrite.Add(x);
+                //Core.IncrementDoneCounter();
             
         }
 
@@ -162,15 +155,10 @@ namespace Spider
         /// </summary>
         public void Shutdown(CancellationToken cancelToken)
         {
-            try
-            {
+            
                 Sw.Flush();
                 Fs.Flush();
-            }
-            catch (Exception e)
-            {
-                // may have already been closed, don't worry about it if they were.
-            }
+            
             CancelTokenGlobal = cancelToken;
             try
             {
