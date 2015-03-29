@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Environment;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using Newtonsoft.Json;
 using PlayerIOClient;
@@ -73,27 +72,6 @@ namespace Spider
         /// </summary>
         /// <value>The fs.</value>
         private FileStream Fs { get; }
-
-        private static void DownloadMinimap(string worldId, string currentDate, string uniqueString)
-        {
-            // minimap
-            var fsMap =
-                new FileStream(
-                    string.Format(FilePath + "\spider_levels\{0}_{1}\{2}.map", currentDate, uniqueString, worldId),
-                    FileMode.CreateNew, FileAccess.Write);
-            var swMap = new StreamWriter(fsMap);
-            try
-            {
-                var contents = new WebClient().DownloadString("http://api.everybodyedits.info/WorldData?id=" + worldId);
-                swMap.Write(contents);
-            }
-            catch (Exception e)
-            {
-                Logger.Log(LogPriority.Error, "Minimap download failed: " + e);
-            }
-            swMap.Flush(); // do not make this async!
-            swMap.Close();
-        }
 
         public void StartQueueWorker()
         {
