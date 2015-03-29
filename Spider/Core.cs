@@ -173,9 +173,9 @@ namespace Spider
 
             InitializeLobbyAndWorkers(cancellationTokenSource);
 
-            Repeat.Interval(TimeSpan.FromMinutes(2), Lobby.List, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMinutes(1), Lobby.List, cancellationTokenSource.Token);
             // replenish and remove stale crawlers every 13 minutes
-            Repeat.Interval(TimeSpan.FromMinutes(13), Spider.Pool.AutoAdjust, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMinutes(4), Spider.Pool.AutoAdjust, cancellationTokenSource.Token);
             // refresh the event counter every minute
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 
