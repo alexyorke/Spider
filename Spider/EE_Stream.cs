@@ -45,16 +45,16 @@ namespace Spider
             var uniqueString = result;
             // make directory
 
-            Directory.CreateDirectory(string.Format(FilePath + @"\spider_levels\{0}_{1}", currentDate,
+            Directory.CreateDirectory(string.Format(FilePath + @"/spider_levels/{0}_{1}", currentDate,
                 uniqueString));
             Logger.Log(LogPriority.Debug,
-                "Writing to: " + string.Format(FilePath + @"\spider_levels\{0}_{1}\{2}", currentDate, uniqueString,
+                "Writing to: " + string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId));
 
-            _donePath = string.Format(FilePath + @"\spider_levels\{0}_{1}\done.txt", currentDate, uniqueString,
+            _donePath = string.Format(FilePath + @"/spider_levels/{0}_{1}/done.txt", currentDate, uniqueString,
                 worldId);
             Fs = new FileStream(
-                string.Format(FilePath + @"\spider_levels\{0}_{1}\{2}", currentDate, uniqueString,
+                string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId), FileMode.Append, FileAccess.Write);
             Sw = new StreamWriter(Fs) {AutoFlush = false};
 
