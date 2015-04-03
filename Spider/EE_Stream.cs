@@ -58,6 +58,7 @@ namespace Spider
                     worldId), FileMode.Append, FileAccess.Write);
             Sw = new StreamWriter(Fs) {AutoFlush = false};
 
+            Sw.WriteLine(JsonConvert.SerializeObject(new Dictionary<string,string> { {"date_started", DateTime.Now.ToString()} }));
             //DownloadMinimap(worldId, currentDate, uniqueString);
         }
 
