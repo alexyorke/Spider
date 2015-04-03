@@ -7,9 +7,9 @@ namespace Spider
     /// </summary>
     internal static class Pool
     {
-        private const int MinUsersFeatured = 4;
-        private const int Buffer = 2;
-        private const int MinimumUsers = 7;
+        private const int MinUsersFeatured = 3;
+        private const int Buffer = 1;
+        private const int MinimumUsers = 3;
 
         /// <summary>
         ///     Automatics the adjust.
@@ -29,10 +29,10 @@ namespace Spider
                 // if room value is greater than or equal to 4 then if it's not crawling a world then crawl
                 // if room value is less than 4 then if it is crawling then don't crawl
 
-                if (room.Value >= MinUsersFeatured ||
-                    (room.Key == "PWKK8zFHH8bEI" && room.Value > MinimumUsers) ||
-                    (room.Key == "PWL2NjNOdhbEI" && room.Value > MinimumUsers) ||
-                    (room.Key == "PWbnzNQNi4a0I" && room.Value > MinimumUsers))
+                if (room.Value >= MinimumUsers ||
+                    (room.Key == "PWKK8zFHH8bEI" && room.Value > MinUsersFeatured) ||
+                    (room.Key == "PWL2NjNOdhbEI" && room.Value > MinUsersFeatured) ||
+                    (room.Key == "PWbnzNQNi4a0I" && room.Value > MinUsersFeatured))
                     // 200 lava minigames, super mario bros (featured), coin level (featured)
                 {
 
@@ -49,7 +49,7 @@ namespace Spider
                 }
                 else
                 {
-                    if (Core.CrawlerTasks.ContainsKey(roomKey) && room.Value >= (MinimumUsers - Buffer))
+                    if (Core.CrawlerTasks.ContainsKey(roomKey) && (room.Value < (MinimumUsers - Buffer)))
                     {
                         // add a bit of a buffer so that there aren't too many fragments
                         Logger.Log(LogPriority.Debug, "Removing a crawler");
