@@ -1,9 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Newtonsoft.Json;
 using PlayerIOClient;
 
 namespace Spider
@@ -32,6 +29,8 @@ namespace Spider
         {
             GlobalConnect = connection;
         }
+
+        public static bool HasNotReconnected { get; set; }
 
         /// <summary>
         ///     Gets the client.
@@ -65,18 +64,16 @@ namespace Spider
             cancelToken.ThrowIfCancellationRequested();
         }
 
-        
 
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
         /// <param name="worldId">The world identifier.</param>
         /// <param name="cancelToken">The cancel token.</param>
-        public void Crawl(string worldId, CancellationToken cancelToken, bool reconnect = false)
+        /// <param name="reconnect"></param>
+        public void Crawl(string worldId, CancellationToken cancelToken, bool reconnect = true)
         {
             var eeEvent = new EeStream(worldId);
-
-            Task.Run(() => eeEvent.StartQueueWorker(), cancelToken);
 
             Client.Multiplayer.JoinRoom(worldId, null, // never create a new room. Ever!
                 delegate(Connection connection)
@@ -92,21 +89,20 @@ namespace Spider
                             GlobalConnection.Send("init2");
                         }
                         eeEvent.Write(m, Core.Stopwatch.Elapsed.TotalSeconds);
-                        if (cancelToken.IsCancellationRequested)
+                        Core.IncrementDoneCounter();
+                        /*if (!cancelToken.IsCancellationRequested) return;
+                        try
                         {
-                            try
-                            {
-                                GlobalConnection.Send("/bye");
-                            }
-                            catch (Exception)
-                            {
-                                // silence the error because we know this command is invalid.
-                                // this is just to push a system message to us and so therefore
-                                // the cancellation message will be pushed through too.
-                            }
-                            connection.Disconnect();
-                            Shutdown(cancelToken, eeEvent);
+                            GlobalConnection.Send("/bye");
                         }
+                        catch (Exception)
+                        {
+                            // silence the error because we know this command is invalid.
+                            // this is just to push a system message to us and so therefore
+                            // the cancellation message will be pushed through too.
+                        }
+                        connection.Disconnect();
+                        Shutdown(cancelToken, eeEvent);*/
                     };
 
 
@@ -119,12 +115,11 @@ namespace Spider
                         if (message.Contains("receivedBytes == 0"))
                         {
                             // client crashed
-                            if (reconnect)
+                            if (reconnect && !HasNotReconnected)
                             {
                                 Logger.Log(LogPriority.Debug, "Client crashed. Restarting crawler...");
-
-                                var t = Task.Run(async delegate { await Task.Delay(3000); });
-                                t.Wait();
+                                HasNotReconnected = true;
+                               Thread.Sleep(1000);
                                 Crawl(worldId, cancelToken); // reconnect once
                             }
                             else
@@ -145,7 +140,7 @@ namespace Spider
                             }
                         }
 
-                        if (!cancelToken.IsCancellationRequested)
+                        if (cancelToken.IsCancellationRequested)
                         {
                             var t = Task.Run(async delegate
                             {

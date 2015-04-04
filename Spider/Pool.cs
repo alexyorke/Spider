@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 
 namespace Spider
@@ -26,19 +27,17 @@ namespace Spider
             {
                 var roomKey = room.Key;
 
-                // if room value is greater than or equal to 4 then if it's not crawling a world then crawl
-                // if room value is less than 4 then if it is crawling then don't crawl
-
                 if (room.Value >= MinimumUsers ||
                     (room.Key == "PWKK8zFHH8bEI" && room.Value > MinUsersFeatured) ||
                     (room.Key == "PWL2NjNOdhbEI" && room.Value > MinUsersFeatured) ||
-                    (room.Key == "PWbnzNQNi4a0I" && room.Value > MinUsersFeatured))
+                    (room.Key == "PWbnzNQNi4a0I" && room.Value > MinUsersFeatured) ||
+                    (room.Key == "PWAIjKWOiLbEI")) // tutorial room
                     // 200 lava minigames, super mario bros (featured), coin level (featured)
                 {
 
-
                     if (!Core.CrawlerTasks.ContainsKey(roomKey) || Core.CrawlerTasks.Count == 0)
                     {
+                        Console.WriteLine("[IMP] Began to crawl a room: value: "+room.Value);
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(roomKey, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();
@@ -51,6 +50,7 @@ namespace Spider
                 {
                     if (Core.CrawlerTasks.ContainsKey(roomKey) && (room.Value < (MinimumUsers - Buffer)))
                     {
+                        Console.WriteLine("Going to kill room with value: " + room.Value);
                         // add a bit of a buffer so that there aren't too many fragments
                         Logger.Log(LogPriority.Debug, "Removing a crawler");
                         Core.RemoveCrawler(roomKey);

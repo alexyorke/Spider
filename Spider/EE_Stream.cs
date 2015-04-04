@@ -2,9 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Environment;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PlayerIOClient;
 
@@ -15,18 +18,21 @@ namespace Spider
     /// </summary>
     public class EeStream
     {
-        public static readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
-        public static CancellationToken CancelTokenGlobal;
+        private static readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
+        private static CancellationToken CancelTokenGlobal;
 
         /// <summary>
         ///     The _RND
         /// </summary>
         private readonly Random _rnd = new Random();
 
-        private BlockingCollection<Dictionary<Message, double>> _dataToWrite =
-            new BlockingCollection<Dictionary<Message, double>>();
+        private BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
+            new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
 
         private readonly string _donePath;
+
+        public int garbageCollectCounter { get; private set; }
+
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="EeStream" /> class.
@@ -34,6 +40,7 @@ namespace Spider
         /// <param name="worldId">The world identifier.</param>
         public EeStream(string worldId)
         {
+            garbageCollectCounter = 1;
             var currentDate = DateTime.Now.ToString("yyyy-M-d");
 
             // random string from stackoverflow
@@ -53,37 +60,30 @@ namespace Spider
 
             _donePath = string.Format(FilePath + @"/spider_levels/{0}_{1}/done.txt", currentDate, uniqueString,
                 worldId);
-            Fs = new FileStream(
+            var fs = new FileStream(
                 string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId), FileMode.Append, FileAccess.Write);
-            Sw = new StreamWriter(Fs) {AutoFlush = false};
 
-            Sw.WriteLine(JsonConvert.SerializeObject(new Dictionary<string,string> { {"date_started", DateTime.Now.ToString()} }));
-            //DownloadMinimap(worldId, currentDate, uniqueString);
+            var sw = new StreamWriter(fs);
+
+
+            sw.WriteLine(
+                JsonConvert.SerializeObject(new Dictionary<string, string>
+                {
+                    {"date_started", DateTime.Now.ToString(CultureInfo.InvariantCulture)}
+                }));
+
+            Task.Run(() => StartQueueWorker(sw), CancelTokenGlobal);
         }
 
-        /// <summary>
-        ///     Gets or sets the sw.
-        /// </summary>
-        /// <value>The sw.</value>
-        private StreamWriter Sw { get; }
 
-        /// <summary>
-        ///     Gets or sets the fs.
-        /// </summary>
-        /// <value>The fs.</value>
-        private FileStream Fs { get; }
 
-        public void StartQueueWorker()
+        private void StartQueueWorker(StreamWriter sw)
         {
             while (true)
             {
-                var data = _dataToWrite.Take();
-                foreach (var anEvent in data)
-                {
-                    Core.IncrementDoneCounter();
-                    Sw.WriteLine(JsonConvert.SerializeObject(anEvent));
-                }
+                WriteEventToFile(sw);
+
                 if (CancelTokenGlobal.IsCancellationRequested)
                 {
                     // stop the loop
@@ -97,36 +97,47 @@ namespace Spider
             for (var i = 0; i <= queuedEventCount; i++)
             {
                 Console.WriteLine("Writing event " + i + " of " + queuedEventCount);
-                var data = _dataToWrite.Take();
-                foreach (var anEvent in data)
-                {
-                    Core.IncrementDoneCounter();
-                    Sw.WriteLine(JsonConvert.SerializeObject(anEvent));
-                }
+                WriteEventToFile(sw);
             }
-            Sw.Flush();
-            
-      
-                Fs.Flush();
-                //Fs.Close(); // closes sw too
-                
-           
-            //_dataToWrite = null; // trying to fix memory issue
+            Console.WriteLine("StartQueueWorker() exited.");
+            _dataToWrite.Dispose();
         }
 
-        /// <summary>
+        private void WriteEventToFile(StreamWriter sw)
+        {
+            var data = _dataToWrite.Take();
+
+            var data2 = data.Value;
+            foreach (var anEvent in data2)
+            {
+                //Core.IncrementDoneCounter();
+                sw.WriteLine(JsonConvert.SerializeObject(anEvent));
+                Core.IncrementDoneCounter();
+            }
+            //_dataToWrite.Dispose();
+        }
+
+
+
+    /// <summary>
         ///     Writes the specified m.
         /// </summary>
         /// <param name="m">The m.</param>
         /// <param name="secondsElapsed">The seconds elapsed.</param>
         public void Write(Message m, double secondsElapsed)
         {
-           
-                var x = new Dictionary<Message,
-                    double> {{m, secondsElapsed}};
-            _dataToWrite.Add(x);
-                //Core.IncrementDoneCounter();
-            
+            Message m1 = m;
+            double secondsElapsed1 = secondsElapsed;
+            var strongBox = new StrongBox<Dictionary<Message,double>>(new Dictionary<Message,
+                double> { { m1, secondsElapsed1 } });
+            _dataToWrite.Add(strongBox);
+            //Core.IncrementDoneCounter();
+        garbageCollectCounter++;
+            if ((garbageCollectCounter%1000 == 0))
+            {
+                Task.Factory.StartNew(() => GC.GetTotalMemory(true));
+                garbageCollectCounter = 0;
+            }
         }
 
         /// <summary>
@@ -134,10 +145,8 @@ namespace Spider
         /// </summary>
         public void Shutdown(CancellationToken cancelToken)
         {
-            
-                Sw.Flush();
-                Fs.Flush();
-            
+           
+
             CancelTokenGlobal = cancelToken;
             try
             {
@@ -147,15 +156,12 @@ namespace Spider
                     tw.WriteLine("done");
                     tw.Close();
                 }
+
             }
             catch (Exception)
             {
-
                 Console.WriteLine("Could not create done file");
-                
             }
-
-
         }
     }
 }

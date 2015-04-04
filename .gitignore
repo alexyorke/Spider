@@ -184,3 +184,4 @@ FakesAssemblies/
 
 Spider/Config.cs
 Spider/Config.cs
+*.diagsession
