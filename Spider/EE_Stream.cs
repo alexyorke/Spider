@@ -31,7 +31,7 @@ namespace Spider
 
         private readonly string _donePath;
 
-        public int garbageCollectCounter { get; private set; }
+        private int GarbageCollectCounter { get; set; }
 
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Spider
         /// <param name="worldId">The world identifier.</param>
         public EeStream(string worldId)
         {
-            garbageCollectCounter = 1;
+            GarbageCollectCounter = 1;
             var currentDate = DateTime.Now.ToString("yyyy-M-d");
 
             // random string from stackoverflow
@@ -130,14 +130,15 @@ namespace Spider
             double secondsElapsed1 = secondsElapsed;
             var strongBox = new StrongBox<Dictionary<Message,double>>(new Dictionary<Message,
                 double> { { m1, secondsElapsed1 } });
+        try
+        {
             _dataToWrite.Add(strongBox);
-            //Core.IncrementDoneCounter();
-        garbageCollectCounter++;
-            if ((garbageCollectCounter%1000 == 0))
-            {
-                Task.Factory.StartNew(() => GC.GetTotalMemory(true));
-                garbageCollectCounter = 0;
-            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The queue has already been disposed. Cannot write.");
+        }
+
         }
 
         /// <summary>

@@ -179,12 +179,18 @@ namespace Spider
             // refresh the event counter every minute
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 
+            Repeat.Interval(TimeSpan.FromMilliseconds(500), Core.GarbageCollect, cancellationTokenSource.Token);
             var info = Console.ReadKey();
             if (info.Key == ConsoleKey.Q)
             {
                 Console.WriteLine("Recieved shutdown signal from console.");
                 Shutdown(cancellationTokenSource);
             }
+        }
+
+        private static void GarbageCollect()
+        {
+            GC.GetTotalMemory(true);
         }
     }
 }
