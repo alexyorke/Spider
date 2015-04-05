@@ -47,7 +47,7 @@ namespace Spider
 
                 // return client back to the cold, dark, pool.
                 //connection = null;
-                Core.Pool.PutObject(connection);
+                //Core.Pool.PutObject(connection);
                 waitForLobby.Set();
             });
             waitForLobby.WaitOne();
