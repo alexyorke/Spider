@@ -67,11 +67,6 @@ namespace Spider
             Interlocked.Increment(ref _doneCounter);
         }
 
-        public static void DecrementDoneCounter()
-        {
-            Interlocked.Decrement(ref _doneCounter);
-        }
-
         public static void ZeroDoneCounter()
         {
             Interlocked.Exchange(ref _doneCounter, 0);
