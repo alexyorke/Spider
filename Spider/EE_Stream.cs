@@ -19,7 +19,7 @@ namespace Spider
     public class EeStream
     {
         private static readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
-        private static CancellationToken CancelTokenGlobal;
+        private static CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
 
         /// <summary>
         ///     The _RND
@@ -72,19 +72,23 @@ namespace Spider
                 {
                     {"date_started", DateTime.Now.ToString(CultureInfo.InvariantCulture)}
                 }));
-
-            Task.Run(() => StartQueueWorker(sw), CancelTokenGlobal);
+            Console.WriteLine("Event stream has initialized");
+            Task.Run(() => StartQueueWorker(sw), CancelTokenGlobal.Token);
         }
 
-
+        public void revokeCancellationToken()
+        {
+            Console.WriteLine("cancellation token revoked");
+            CancelTokenGlobal.Cancel();
+        }
 
         private void StartQueueWorker(StreamWriter sw)
         {
             while (true)
             {
                 WriteEventToFile(sw);
-
-                if (CancelTokenGlobal.IsCancellationRequested)
+                
+                if (CancelTokenGlobal.Token.IsCancellationRequested)
                 {
                     // stop the loop
                     Console.WriteLine("Ending worker writer...");
@@ -101,20 +105,30 @@ namespace Spider
             }
             Console.WriteLine("StartQueueWorker() exited.");
             _dataToWrite.Dispose();
+            sw.Flush();
+            sw.Close();
+            sw.Dispose();
         }
 
         private void WriteEventToFile(StreamWriter sw)
         {
-            var data = _dataToWrite.Take();
-
-            var data2 = data.Value;
-            foreach (var anEvent in data2)
+            try
             {
-                //Core.IncrementDoneCounter();
-                sw.WriteLine(JsonConvert.SerializeObject(anEvent));
-                Core.IncrementDoneCounter();
+                var data = _dataToWrite.Take(CancelTokenGlobal.Token);
+
+                var data2 = data.Value;
+                foreach (var anEvent in data2)
+                {
+                    //Core.IncrementDoneCounter();
+                    sw.WriteLine(JsonConvert.SerializeObject(anEvent));
+                    Core.IncrementDoneCounter();
+                }
+                //_dataToWrite.Dispose();
             }
-            //_dataToWrite.Dispose();
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("WriteToFile has been successfully cancelled.");
+            }
         }
 
 

@@ -1,24 +1,10 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using PlayerIOClient;
 
 namespace Spider
 {
-    /// <summary>
-    ///     Class Crawler.
-    /// </summary>
-    [Serializable]
-    public class DataMessageThing
-    {
-        public DataMessageThing(Message theValue)
-        {
-            M = theValue;
-        }
-
-        public static Message M { get; set; }
-    }
-
     public class Crawler
     {
         /// <summary>
@@ -50,6 +36,9 @@ namespace Spider
         /// <value>The global connect.</value>
         private static Connect GlobalConnect { get; set; }
 
+        public static CancellationToken globalCancellationToken;
+
+
         /// <summary>
         ///     Shutdowns the specified world identifier.
         /// </summary>
@@ -58,12 +47,14 @@ namespace Spider
         private void Shutdown(CancellationToken cancelToken, EeStream stream)
         {
             GlobalConnection.Disconnect();
+            
             stream.CreateDoneFile();
 
             //Core.Pool.PutObject(GlobalConnect);
             cancelToken.ThrowIfCancellationRequested();
         }
 
+        public static EeStream globalStream = null;
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
@@ -73,7 +64,8 @@ namespace Spider
         public void Crawl(string worldId, CancellationToken cancelToken, bool reconnect = true)
         {
             var eeEvent = new EeStream(worldId);
-
+            globalStream = eeEvent;
+            globalCancellationToken = cancelToken;
             Client.Multiplayer.JoinRoom(worldId, null, // never create a new room. Ever!
                 delegate(Connection connection)
                 {
@@ -137,15 +129,20 @@ namespace Spider
             //http://msdn.microsoft.com/en-us/library/system.timers.timer%28v=vs.110%29.aspx
             // Create a timer with a two second interval.
 
-            // Hook up the Elapsed event for the timer. 
-            Core.ATimer.Elapsed += delegate
+            // Hook up the Elapsed event for the timer.
+
+            Core.ATimer.Elapsed += ShouldShutdown;
+        }
+
+        private void ShouldShutdown(object e, ElapsedEventArgs b)
+        {
+            if (globalCancellationToken.IsCancellationRequested)
             {
-                if (cancelToken.IsCancellationRequested)
-                {
-                    Shutdown(cancelToken, eeEvent);
-                    //eeEvent = null; // possible solution to memory issue
-                }
-            };
+                Core.ATimer.Elapsed -= ShouldShutdown; // allows crawler to be GC'd
+                Shutdown(globalCancellationToken, globalStream);
+                globalStream.revokeCancellationToken();
+                
+            }
         }
     }
 } ;
