@@ -99,10 +99,10 @@ namespace Spider
                             // client crashed
                             if (reconnect && !HasNotReconnected)
                             {
-                                Logger.Log(LogPriority.Debug, "Client crashed. Restarting crawler...");
+                                /*Logger.Log(LogPriority.Debug, "Client crashed. Restarting crawler...");
                                 HasNotReconnected = true;
                                Thread.Sleep(1000);
-                                Crawl(worldId, cancelToken); // reconnect once
+                                Crawl(worldId, cancelToken); // reconnect once*/
                             }
                             else
                             {
