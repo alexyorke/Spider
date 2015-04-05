@@ -130,25 +130,17 @@ namespace Spider
             double secondsElapsed1 = secondsElapsed;
             var strongBox = new StrongBox<Dictionary<Message,double>>(new Dictionary<Message,
                 double> { { m1, secondsElapsed1 } });
-        try
-        {
+        
             _dataToWrite.Add(strongBox);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("The queue has already been disposed. Cannot write.");
-        }
-
+        
         }
 
         /// <summary>
         ///     Shutdowns this instance.
         /// </summary>
-        public void Shutdown(CancellationToken cancelToken)
+        public void CreateDoneFile()
         {
-           
 
-            CancelTokenGlobal = cancelToken;
             try
             {
                 using (Stream stream = File.Create(_donePath))

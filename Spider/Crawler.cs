@@ -58,16 +58,12 @@ namespace Spider
         private void Shutdown(CancellationToken cancelToken, EeStream stream)
         {
             GlobalConnection.Disconnect();
-            stream.Shutdown(cancelToken);
+            stream.CreateDoneFile();
 
             //Core.Pool.PutObject(GlobalConnect);
             cancelToken.ThrowIfCancellationRequested();
         }
 
-        public void OnMessage(object sender, Message m)
-        {
-            
-        }
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
@@ -134,15 +130,7 @@ namespace Spider
                             }
                         }
 
-                        if (cancelToken.IsCancellationRequested)
-                        {
-                            var t = Task.Run(async delegate
-                            {
-                                Shutdown(cancelToken, eeEvent);
-                                Logger.Log(LogPriority.Info, "Crawler stopped successfully.");
-                            }, cancelToken);
-                            t.Wait(cancelToken);
-                        }
+                        
                     };
                 });
 
