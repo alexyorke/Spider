@@ -49,7 +49,7 @@ namespace Spider
             GlobalConnection.Disconnect();
             
             stream.CreateDoneFile();
-
+            Client.Logout();
             //Core.Pool.PutObject(GlobalConnect);
             cancelToken.ThrowIfCancellationRequested();
         }
