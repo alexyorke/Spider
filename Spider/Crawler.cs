@@ -64,7 +64,10 @@ namespace Spider
             cancelToken.ThrowIfCancellationRequested();
         }
 
-
+        public void OnMessage(object sender, Message m)
+        {
+            
+        }
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
@@ -82,7 +85,7 @@ namespace Spider
 
                     Logger.Log(LogPriority.Info, Client.ConnectUserId + " is connected to " + worldId);
 
-                    GlobalConnection.OnMessage += delegate(object sender, Message m)
+                    MessageReceivedEventHandler connOnMessageReceivedEventHandler = delegate (object sender, Message m)
                     {
                         if (m.Type == "init")
                         {
@@ -90,20 +93,9 @@ namespace Spider
                         }
                         eeEvent.Write(m, Core.Stopwatch.Elapsed.TotalSeconds);
                         Core.IncrementDoneCounter();
-                        /*if (!cancelToken.IsCancellationRequested) return;
-                        try
-                        {
-                            GlobalConnection.Send("/bye");
-                        }
-                        catch (Exception)
-                        {
-                            // silence the error because we know this command is invalid.
-                            // this is just to push a system message to us and so therefore
-                            // the cancellation message will be pushed through too.
-                        }
-                        connection.Disconnect();
-                        Shutdown(cancelToken, eeEvent);*/
                     };
+
+                    GlobalConnection.OnMessage += connOnMessageReceivedEventHandler;
 
 
                     GlobalConnection.Send("init");
@@ -112,6 +104,8 @@ namespace Spider
                     
                     GlobalConnection.OnDisconnect += delegate(object sender2, string message)
                     {
+                        GlobalConnection.OnMessage -= connOnMessageReceivedEventHandler;
+
                         if (message.Contains("receivedBytes == 0"))
                         {
                             // client crashed
