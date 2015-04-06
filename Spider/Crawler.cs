@@ -152,14 +152,15 @@ namespace Spider
             if (cancelToken.IsCancellationRequested && !hasShutdown)
             {
                 Console.WriteLine("Entered ShouldShutdown");
-                
+                Thread.Sleep(500);
                 Shutdown(cancelToken, globalStream);
                 GlobalConnection = null;
                 globalStream.revokeCancellationToken();
                 globalStream = null;
-                
-                cancelToken.ThrowIfCancellationRequested();
+
                 hasShutdown = true;
+                cancelToken.ThrowIfCancellationRequested();
+                
             }
 
         }
