@@ -45,11 +45,11 @@ namespace Spider
         /// </summary>
         /// <param name="cancelToken">The cancel token.</param>
         /// <param name="stream">The stream.</param>
-        private void Shutdown(CancellationToken cancelToken, EeStream stream, ManualResetEvent myWaitEvent)
+        private void Shutdown(CancellationToken cancelToken, EeStream stream, AutoResetEvent myWaitEvent)
         {
             GlobalConnection.Disconnect();
 
-            stream.CreateDoneFile();
+            //stream.CreateDoneFile();
             Client.Logout();
             myWaitEvent.Set();
         }
@@ -148,7 +148,7 @@ namespace Spider
             {
                 Console.WriteLine("Entered ShouldShutdown");
 
-                var myWaitHandle = new ManualResetEvent(false);
+                var myWaitHandle = new AutoResetEvent(false);
                 Shutdown(cancelToken, globalStream, myWaitHandle);
                 GlobalConnection = null;
 
