@@ -147,25 +147,5 @@ namespace Spider
                 _dataToWrite.Add(strongBox);
             }
         }
-
-        /// <summary>
-        ///     Shutdowns this instance.
-        /// </summary>
-        public void CreateDoneFile()
-        {
-            try
-            {
-                using (Stream stream = File.Create(_donePath))
-                {
-                    TextWriter tw = new StreamWriter(stream); /* this is where the problem was */
-                    tw.WriteLine("done");
-                    tw.Close();
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Could not create done file");
-            }
-        }
     }
 }
