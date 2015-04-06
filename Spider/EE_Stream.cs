@@ -144,9 +144,12 @@ namespace Spider
             double secondsElapsed1 = secondsElapsed;
             var strongBox = new StrongBox<Dictionary<Message,double>>(new Dictionary<Message,
                 double> { { m1, secondsElapsed1 } });
-        
+
+        if (!CancelTokenGlobal.IsCancellationRequested)
+        {
             _dataToWrite.Add(strongBox);
-        
+        }
+
         }
 
         /// <summary>
