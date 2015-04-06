@@ -154,7 +154,7 @@ namespace Spider
 
                 myWaitHandle.WaitOne();
                 globalStream.revokeCancellationToken();
-                globalStream = null;
+                //globalStream = null;
 
                 hasShutdown = true;
                 cancelToken.ThrowIfCancellationRequested();
