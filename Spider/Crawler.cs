@@ -54,6 +54,8 @@ namespace Spider
         }
 
         public static EeStream globalStream = null;
+        private bool hasShutdown = false;
+
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
@@ -142,22 +144,24 @@ namespace Spider
 
             // Hook up the Elapsed event for the timer.
 
-            Core.ATimer.Elapsed += delegate(object o, ElapsedEventArgs args) { ShouldShutdown(args,cancelToken); };
+            Core.ATimer.Elapsed += (o, args) => ShouldShutdown(args, cancelToken);
         }
 
         private void ShouldShutdown(ElapsedEventArgs g,CancellationToken cancelToken)
         {
-            if (cancelToken.IsCancellationRequested && GlobalConnection.Connected)
+            if (cancelToken.IsCancellationRequested && !hasShutdown)
             {
                 Console.WriteLine("Entered ShouldShutdown");
-                GlobalConnection = null;
+                
                 Shutdown(cancelToken, globalStream);
+                GlobalConnection = null;
                 globalStream.revokeCancellationToken();
                 globalStream = null;
                 
                 cancelToken.ThrowIfCancellationRequested();
-
+                hasShutdown = true;
             }
+
         }
     }
 } ;
