@@ -78,20 +78,27 @@ namespace Spider
         /// <param name="roomKey">The room key.</param>
         public static void RemoveCrawler(string roomKey)
         {
-            var stale = CrawlerTasks[roomKey];
-            var tokenSource = stale.First().Value;
 
-            tokenSource.Cancel();
-            try
+            foreach (var crawler in CrawlerTasks)
             {
-                stale.First().Key.Wait(tokenSource.Token); //wait for task to abort
+                var cancellationTokenSource = new CancellationTokenSource();
+                Logger.Log(LogPriority.Debug, "Gracefully ending crawler (from stopCrawler)...");
+                //Wait for task to disconnect
+                if (crawler.Key == roomKey) // is the right crawler
+                {
+                    var x = crawler.Value.Last();
+                    x.Value.Cancel();
+                    try
+                    {
+                        x.Key.Wait(cancellationTokenSource.Token);
+                        Task.Delay(5000);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogPriority.Warning, e.Message);
+                    }
+                }
             }
-            catch (TaskCanceledException)
-            {
-                // don't worry about this; it just means that
-                // the task was canceled.
-            }
-            CrawlerTasks.Remove(roomKey);
         }
 
         /// <summary>
@@ -189,3 +196,4 @@ namespace Spider
         }
     }
 }
+ 
