@@ -33,7 +33,6 @@ namespace Spider
             new Dictionary<string, Dictionary<Task, CancellationTokenSource>>();
 
         private static int _doneCounter;
-
         public static int TotalEvents => _doneCounter;
 
         /// <summary>
@@ -78,7 +77,6 @@ namespace Spider
         /// <param name="roomKey">The room key.</param>
         public static void RemoveCrawler(string roomKey)
         {
-
             foreach (var crawler in CrawlerTasks)
             {
                 var cancellationTokenSource = new CancellationTokenSource();
@@ -112,7 +110,7 @@ namespace Spider
             var cancelToken = new CancellationTokenSource();
             //var connector = Pool.GetObject();
             var connector = new Connect();
-            
+
             var crawlerTask = Task.Factory.StartNew(state =>
             {
                 var crawler = new Crawler(connector);
@@ -181,7 +179,7 @@ namespace Spider
             // refresh the event counter every minute
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 
-            Repeat.Interval(TimeSpan.FromMilliseconds(500), Core.GarbageCollect, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMilliseconds(500), GarbageCollect, cancellationTokenSource.Token);
             var info = Console.ReadKey();
             if (info.Key == ConsoleKey.Q)
             {
@@ -196,4 +194,3 @@ namespace Spider
         }
     }
 }
- 

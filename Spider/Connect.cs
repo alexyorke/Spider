@@ -33,7 +33,7 @@ namespace Spider
             var waitForLogOn = new AutoResetEvent(false);
             var email = Config.Email;
 
-            
+
             PlayerIO.QuickConnect.SimpleConnect(Config.GameId, (email), (Config.Password), null,
                 delegate(Client localClient)
                 {

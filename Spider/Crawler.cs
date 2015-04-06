@@ -8,6 +8,9 @@ namespace Spider
 {
     public class Crawler
     {
+        public static EeStream globalStream;
+        private bool hasShutdown;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="Crawler" /> class.
         /// </summary>
@@ -37,8 +40,6 @@ namespace Spider
         /// <value>The global connect.</value>
         private static Connect GlobalConnect { get; set; }
 
-
-
         /// <summary>
         ///     Shutdowns the specified world identifier.
         /// </summary>
@@ -47,15 +48,11 @@ namespace Spider
         private void Shutdown(CancellationToken cancelToken, EeStream stream, ManualResetEvent myWaitEvent)
         {
             GlobalConnection.Disconnect();
-            
+
             stream.CreateDoneFile();
             Client.Logout();
             myWaitEvent.Set();
-
         }
-
-        public static EeStream globalStream = null;
-        private bool hasShutdown = false;
 
         /// <summary>
         ///     Crawls the specified world identifier.
@@ -74,7 +71,7 @@ namespace Spider
 
                     Logger.Log(LogPriority.Info, Client.ConnectUserId + " is connected to " + worldId);
 
-                    MessageReceivedEventHandler connOnMessageReceivedEventHandler = delegate (object sender, Message m)
+                    MessageReceivedEventHandler connOnMessageReceivedEventHandler = delegate(object sender, Message m)
                     {
                         if (m.Type == "init")
                         {
@@ -87,7 +84,7 @@ namespace Spider
 
                     GlobalConnection.OnMessage += connOnMessageReceivedEventHandler;
 
-                    GlobalConnection.OnMessage += delegate(object sender, Message e)
+                    GlobalConnection.OnMessage += delegate
                     {
                         if (cancelToken.IsCancellationRequested)
                         {
@@ -97,12 +94,11 @@ namespace Spider
                     };
 
                     GlobalConnection.Send("init");
-                    
 
-                    
+
                     GlobalConnection.OnDisconnect += delegate(object sender2, string message)
                     {
-                        Console.WriteLine("Recieved message to disconnect");
+                        Console.WriteLine("Recieved message to disconnect: " + message);
                         Console.WriteLine("Cancellation token has been revoked? " + cancelToken.IsCancellationRequested);
                         Console.WriteLine("Is connected? " + connection.Connected);
                         GlobalConnection.OnMessage -= connOnMessageReceivedEventHandler;
@@ -135,8 +131,6 @@ namespace Spider
                                     "Crawler " + worldId + " disconnected because " + message);
                             }
                         }
-
-                        
                     };
                 });
 
@@ -148,25 +142,23 @@ namespace Spider
             Core.ATimer.Elapsed += (o, args) => ShouldShutdown(args, cancelToken);
         }
 
-        private void ShouldShutdown(ElapsedEventArgs g,CancellationToken cancelToken)
+        private void ShouldShutdown(ElapsedEventArgs g, CancellationToken cancelToken)
         {
             if (cancelToken.IsCancellationRequested && !hasShutdown)
             {
                 Console.WriteLine("Entered ShouldShutdown");
-                
-                ManualResetEvent myWaitHandle = new ManualResetEvent(false);
-                Shutdown(cancelToken, globalStream,myWaitHandle);
+
+                var myWaitHandle = new ManualResetEvent(false);
+                Shutdown(cancelToken, globalStream, myWaitHandle);
                 GlobalConnection = null;
-                
+
                 myWaitHandle.WaitOne();
                 globalStream.revokeCancellationToken();
                 globalStream = null;
 
                 hasShutdown = true;
                 cancelToken.ThrowIfCancellationRequested();
-                
             }
-
         }
     }
 } ;

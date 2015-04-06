@@ -34,10 +34,9 @@ namespace Spider
                     (room.Key == "PWAIjKWOiLbEI")) // tutorial room
                     // 200 lava minigames, super mario bros (featured), coin level (featured)
                 {
-
                     if (!Core.CrawlerTasks.ContainsKey(roomKey) || Core.CrawlerTasks.Count == 0)
                     {
-                        Console.WriteLine("[IMP] Began to crawl a room: value: "+room.Value);
+                        Console.WriteLine("[IMP] Began to crawl a room: value: " + room.Value);
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(roomKey, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();

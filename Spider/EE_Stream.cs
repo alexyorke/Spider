@@ -19,20 +19,17 @@ namespace Spider
     public class EeStream
     {
         private static readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
-        private static CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
+        private static readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
+
+        private readonly BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
+            new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
+
+        private readonly string _donePath;
 
         /// <summary>
         ///     The _RND
         /// </summary>
         private readonly Random _rnd = new Random();
-
-        private BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
-            new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
-
-        private readonly string _donePath;
-
-        private int GarbageCollectCounter { get; set; }
-
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="EeStream" /> class.
@@ -76,6 +73,8 @@ namespace Spider
             Task.Run(() => StartQueueWorker(sw), CancelTokenGlobal.Token);
         }
 
+        private int GarbageCollectCounter { get; set; }
+
         public void revokeCancellationToken()
         {
             Console.WriteLine("cancellation token revoked");
@@ -87,7 +86,7 @@ namespace Spider
             while (true)
             {
                 WriteEventToFile(sw);
-                
+
                 if (CancelTokenGlobal.Token.IsCancellationRequested)
                 {
                     // stop the loop
@@ -131,25 +130,22 @@ namespace Spider
             }
         }
 
-
-
-    /// <summary>
+        /// <summary>
         ///     Writes the specified m.
         /// </summary>
         /// <param name="m">The m.</param>
         /// <param name="secondsElapsed">The seconds elapsed.</param>
         public void Write(Message m, double secondsElapsed)
         {
-            Message m1 = m;
-            double secondsElapsed1 = secondsElapsed;
-            var strongBox = new StrongBox<Dictionary<Message,double>>(new Dictionary<Message,
-                double> { { m1, secondsElapsed1 } });
+            var m1 = m;
+            var secondsElapsed1 = secondsElapsed;
+            var strongBox = new StrongBox<Dictionary<Message, double>>(new Dictionary<Message,
+                double> {{m1, secondsElapsed1}});
 
-        if (!CancelTokenGlobal.IsCancellationRequested)
-        {
-            _dataToWrite.Add(strongBox);
-        }
-
+            if (!CancelTokenGlobal.IsCancellationRequested)
+            {
+                _dataToWrite.Add(strongBox);
+            }
         }
 
         /// <summary>
@@ -157,7 +153,6 @@ namespace Spider
         /// </summary>
         public void CreateDoneFile()
         {
-
             try
             {
                 using (Stream stream = File.Create(_donePath))
@@ -166,7 +161,6 @@ namespace Spider
                     tw.WriteLine("done");
                     tw.Close();
                 }
-
             }
             catch (Exception)
             {
