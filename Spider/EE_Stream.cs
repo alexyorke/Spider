@@ -104,7 +104,7 @@ namespace Spider
                 WriteEventToFile(sw);
             }
             Console.WriteLine("StartQueueWorker() exited.");
-            _dataToWrite.Dispose();
+            //_dataToWrite.Dispose();
             sw.Flush();
             sw.Close();
             sw.Dispose();
