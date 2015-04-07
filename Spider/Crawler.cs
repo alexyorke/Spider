@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -8,8 +9,7 @@ namespace Spider
 {
     public class Crawler
     {
-        public static EeStream globalStream;
-        private bool hasShutdown;
+        private EeStream _globalStream;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Crawler" /> class.
@@ -26,7 +26,7 @@ namespace Spider
         ///     Gets the client.
         /// </summary>
         /// <value>The client.</value>
-        public static Client Client => GlobalConnect.Client;
+        private Client Client => GlobalConnect.Client;
 
         /// <summary>
         ///     Gets or sets the global connection.
@@ -38,22 +38,26 @@ namespace Spider
         ///     Gets or sets the global connect.
         /// </summary>
         /// <value>The global connect.</value>
-        private static Connect GlobalConnect { get; set; }
+        private Connect GlobalConnect { get; set; }
+        public bool hasShown { get; private set; }
+
 
         /// <summary>
         ///     Shutdowns the specified world identifier.
         /// </summary>
         /// <param name="cancelToken">The cancel token.</param>
         /// <param name="stream">The stream.</param>
-        private void Shutdown(CancellationToken cancelToken, EeStream stream, AutoResetEvent myWaitEvent)
+        private void Shutdown(CancellationToken cancelToken, EeStream stream)
         {
             GlobalConnection.Disconnect();
 
             //stream.CreateDoneFile();
             Client.Logout();
-            myWaitEvent.Set();
+            //myWaitEvent.Set();
         }
 
+        private CancellationToken _globalCancellationToken;
+        private MessageReceivedEventHandler _connOnMessageReceivedEventHandler;
         /// <summary>
         ///     Crawls the specified world identifier.
         /// </summary>
@@ -63,7 +67,9 @@ namespace Spider
         public void Crawl(string worldId, CancellationToken cancelToken, bool reconnect = true)
         {
             var eeEvent = new EeStream(worldId);
-            globalStream = eeEvent;
+            _globalStream = eeEvent;
+            _globalCancellationToken = cancelToken;
+            
             Client.Multiplayer.JoinRoom(worldId, null, // never create a new room. Ever!
                 delegate(Connection connection)
                 {
@@ -71,7 +77,7 @@ namespace Spider
 
                     Logger.Log(LogPriority.Info, Client.ConnectUserId + " is connected to " + worldId);
 
-                    MessageReceivedEventHandler connOnMessageReceivedEventHandler = delegate(object sender, Message m)
+                    _connOnMessageReceivedEventHandler = delegate(object sender, Message m)
                     {
                         if (m.Type == "init")
                         {
@@ -79,19 +85,10 @@ namespace Spider
                         }
 
                         eeEvent.Write(m, Core.Stopwatch.Elapsed.TotalSeconds);
-                        Core.IncrementDoneCounter();
+                        
                     };
 
-                    GlobalConnection.OnMessage += connOnMessageReceivedEventHandler;
-
-                    GlobalConnection.OnMessage += delegate
-                    {
-                        if (cancelToken.IsCancellationRequested)
-                        {
-                            Console.WriteLine("Unsubscribing message handler.");
-                            GlobalConnection.OnMessage -= connOnMessageReceivedEventHandler;
-                        }
-                    };
+                    GlobalConnection.OnMessage += _connOnMessageReceivedEventHandler;
 
                     GlobalConnection.Send("init");
 
@@ -101,9 +98,10 @@ namespace Spider
                         Console.WriteLine("Recieved message to disconnect: " + message);
                         Console.WriteLine("Cancellation token has been revoked? " + cancelToken.IsCancellationRequested);
                         Console.WriteLine("Is connected? " + connection.Connected);
-                        GlobalConnection.OnMessage -= connOnMessageReceivedEventHandler;
+                        GlobalConnection.OnMessage -= _connOnMessageReceivedEventHandler;
 
-                        Task.Delay(100);
+                            ShouldShutdown(null, null, true);
+                        
                         if (message.Contains("receivedBytes == 0"))
                         {
                             // client crashed
@@ -139,20 +137,50 @@ namespace Spider
 
             // Hook up the Elapsed event for the timer.
 
-            Core.ATimer.Elapsed += (o, args) => ShouldShutdown(args, cancelToken);
+            Core.ATimer.Elapsed += ShouldShutdown;
+            Core.ATimer.Elapsed += delegate(object sender, ElapsedEventArgs e)
+            {
+                if (cancelToken.IsCancellationRequested && !hasShown)
+                {
+                    Console.WriteLine("Cancellation requested for: " + worldId);
+                    hasShown = true;
+                }
+            };
         }
 
+
+        private void ShouldShutdown(object sender, ElapsedEventArgs e)
+        {
+            ShouldShutdown(null, null, false);
+        }
+
+        private void ShouldShutdown(object sender, ElapsedEventArgs e, bool overrideCancel = false)
+        {
+            if (_globalCancellationToken.IsCancellationRequested || overrideCancel)
+            {
+                Console.WriteLine("[!!!] Unsubscribing message handler.");
+                _connOnMessageReceivedEventHandler = null;
+                Core.ATimer.Elapsed -= ShouldShutdown;
+                Shutdown(_globalCancellationToken, _globalStream);
+                _globalStream.revokeCancellationToken();
+
+                Console.WriteLine("Finished shutting down.");
+                _globalCancellationToken.ThrowIfCancellationRequested();
+            }
+        }
+
+
+/*
         private void ShouldShutdown(ElapsedEventArgs g, CancellationToken cancelToken)
         {
+
             if (cancelToken.IsCancellationRequested && !hasShutdown)
             {
-                Console.WriteLine("Entered ShouldShutdown");
-
                 var myWaitHandle = new AutoResetEvent(false);
                 Shutdown(cancelToken, globalStream, myWaitHandle);
                 GlobalConnection = null;
 
-                myWaitHandle.WaitOne();
+                //myWaitHandle.WaitOne();
                 globalStream.revokeCancellationToken();
                 //globalStream = null;
 
@@ -160,5 +188,6 @@ namespace Spider
                 cancelToken.ThrowIfCancellationRequested();
             }
         }
+*/
     }
 } ;

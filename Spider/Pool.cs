@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Spider
 {
@@ -9,13 +10,13 @@ namespace Spider
     internal static class Pool
     {
         private const int MinUsersFeatured = 3;
-        private const int Buffer = 1;
+        private const int Buffer = 0;
         private const int MinimumUsers = 3;
 
         /// <summary>
         ///     Automatics the adjust.
         /// </summary>
-        public static void AutoAdjust()
+        public static async void AutoAdjust()
         {
             Logger.Log(LogPriority.Debug, "Filling crawler pool...");
 
@@ -25,7 +26,6 @@ namespace Spider
             }
             foreach (var room in Core.LobbyNew)
             {
-                var roomKey = room.Key;
 
                 if (room.Value >= MinimumUsers ||
                     (room.Key == "PWKK8zFHH8bEI" && room.Value > MinUsersFeatured) ||
@@ -34,25 +34,25 @@ namespace Spider
                     (room.Key == "PWAIjKWOiLbEI")) // tutorial room
                     // 200 lava minigames, super mario bros (featured), coin level (featured)
                 {
-                    if (!Core.CrawlerTasks.ContainsKey(roomKey) || Core.CrawlerTasks.Count == 0)
+                    if (!Core.CrawlerTasks.ContainsKey(room.Key) || Core.CrawlerTasks.Count == 0)
                     {
                         Console.WriteLine("[IMP] Began to crawl a room: value: " + room.Value);
                         var createCrawlerHandle = new AutoResetEvent(false);
-                        Core.CreateCrawler(roomKey, createCrawlerHandle);
+                        Core.CreateCrawler(room.Key, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();
-                        Thread.Sleep(3000); // if there is no delay, the clients will never initialize
+                        await Task.Delay(3000); 
+                            //Thread.Sleep(3000); // if there is no delay, the clients will never initialize
                         // because PlayerIO rate limits new connections.
                         // This method should block.
                     }
                 }
                 else
                 {
-                    if (Core.CrawlerTasks.ContainsKey(roomKey) && (room.Value < (MinimumUsers - Buffer)))
+                    if (Core.CrawlerTasks.ContainsKey(room.Key) && (room.Value < (MinimumUsers - Buffer)))
                     {
-                        Console.WriteLine("Going to kill room with value: " + room.Value);
                         // add a bit of a buffer so that there aren't too many fragments
                         Logger.Log(LogPriority.Debug, "Removing a crawler");
-                        Core.RemoveCrawler(roomKey);
+                        Core.RemoveCrawler(room.Key);
                     }
                 }
             }

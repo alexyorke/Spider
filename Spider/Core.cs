@@ -13,13 +13,8 @@ namespace Spider
     /// </summary>
     public static class Core
     {
-        public static Timer ATimer = new Timer(2000);
-        public static Stopwatch Stopwatch = new Stopwatch();
-
-        /// <summary>
-        ///     The pool
-        /// </summary>
-        public static ObjectPool<Connect> Pool = new ObjectPool<Connect>(() => new Connect());
+        public static readonly Timer ATimer = new Timer(1000);
+        public static readonly Stopwatch Stopwatch = new Stopwatch();
 
         /// <summary>
         ///     The lobby new
@@ -29,32 +24,16 @@ namespace Spider
         /// <summary>
         ///     The crawler tasks
         /// </summary>
-        public static Dictionary<string, Dictionary<Task, CancellationTokenSource>> CrawlerTasks =
+        public static readonly Dictionary<string, Dictionary<Task, CancellationTokenSource>> CrawlerTasks =
             new Dictionary<string, Dictionary<Task, CancellationTokenSource>>();
 
         private static int _doneCounter;
-        public static int TotalEvents => _doneCounter;
-
-        /// <summary>
-        ///     Gets or sets the total events.
-        /// </summary>
-        /// <value>The total events.</value>
-        /// <summary>
-        ///     Shows the event rate per minute.
-        /// </summary>
-        public static void ShowEventRatePerMinute(bool zeroDoneCounterBool = true)
-        {
-            Console.Write("\r " + "Events/min: " + TotalEvents);
-            if (zeroDoneCounterBool)
-            {
-                ZeroDoneCounter();
-            }
-        }
+        private static int TotalEvents => _doneCounter;
 
         /// <summary>
         ///     Shows the event rate per minute.
         /// </summary>
-        public static void ShowEventRatePerMinute()
+        private static void ShowEventRatePerMinute()
         {
             Console.Write("\r " + "Events/min: " + TotalEvents);
 
@@ -66,7 +45,7 @@ namespace Spider
             Interlocked.Increment(ref _doneCounter);
         }
 
-        public static void ZeroDoneCounter()
+        private static void ZeroDoneCounter()
         {
             Interlocked.Exchange(ref _doneCounter, 0);
         }
@@ -77,34 +56,33 @@ namespace Spider
         /// <param name="roomKey">The room key.</param>
         public static void RemoveCrawler(string roomKey)
         {
-            foreach (var crawler in CrawlerTasks)
+            Dictionary<Task, CancellationTokenSource> crawlerToBeRemoved;
+            CrawlerTasks.TryGetValue(roomKey, out crawlerToBeRemoved);
+
+            if (crawlerToBeRemoved != null)
             {
-                var cancellationTokenSource = new CancellationTokenSource();
-                Logger.Log(LogPriority.Debug, "Gracefully ending crawler (from stopCrawler)...");
-                //Wait for task to disconnect
-                if (crawler.Key == roomKey) // is the right crawler
+                crawlerToBeRemoved.ElementAt(0).Value.Cancel();
+                try
                 {
-                    var x = crawler.Value.Last();
-                    x.Value.Cancel();
-                    try
-                    {
-                        x.Key.Wait(cancellationTokenSource.Token);
-                        Task.Delay(5000);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(LogPriority.Warning, e.Message);
-                    }
+                    crawlerToBeRemoved.ElementAt(0).Key.Wait();
+                    CrawlerTasks.Remove(roomKey);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(LogPriority.Warning, e.Message);
                 }
             }
+            else
+                Logger.Log(LogPriority.Error, "The specified crawler could not be found.");
         }
 
+
         /// <summary>
-        ///     Creates the crawler.
-        /// </summary>
-        /// <param name="roomKey">The room key.</param>
-        /// <param name="createCrawlerHandle"></param>
-        public static void CreateCrawler(string roomKey, AutoResetEvent createCrawlerHandle)
+                    ///     Creates the crawler.
+                    /// </summary>
+                    /// <param name="roomKey">The room key.</param>
+                    /// <param name="createCrawlerHandle"></param>
+         public static  void CreateCrawler(string roomKey, AutoResetEvent createCrawlerHandle)
         {
             Logger.Log(LogPriority.Debug, "Initializing crawler...");
             var cancelToken = new CancellationTokenSource();
@@ -140,7 +118,7 @@ namespace Spider
                 x.Value.Cancel();
                 try
                 {
-                    x.Key.Wait(cancellationTokenSource.Token);
+                    x.Key.Wait();
                     Task.Delay(5000);
                 }
                 catch (Exception e)
@@ -175,7 +153,7 @@ namespace Spider
 
             Repeat.Interval(TimeSpan.FromMinutes(1), Lobby.List, cancellationTokenSource.Token);
             // replenish and remove stale crawlers every 7 minutes
-            Repeat.Interval(TimeSpan.FromMinutes(9), Spider.Pool.AutoAdjust, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMinutes(3), Pool.AutoAdjust, cancellationTokenSource.Token);
             // refresh the event counter every minute
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 

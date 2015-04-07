@@ -18,13 +18,11 @@ namespace Spider
     /// </summary>
     public class EeStream
     {
-        private static readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
-        private static readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
+        private readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
+        private readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
 
         private readonly BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
             new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
-
-        private readonly string _donePath;
 
         /// <summary>
         ///     The _RND
@@ -55,8 +53,6 @@ namespace Spider
                 "Writing to: " + string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId));
 
-            _donePath = string.Format(FilePath + @"/spider_levels/{0}_{1}/done.txt", currentDate, uniqueString,
-                worldId);
             var fs = new FileStream(
                 string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId), FileMode.Append, FileAccess.Write);
@@ -99,7 +95,7 @@ namespace Spider
             var queuedEventCount = _dataToWrite.Count;
             for (var i = 0; i <= queuedEventCount; i++)
             {
-                Console.WriteLine("Writing event " + i + " of " + queuedEventCount);
+                //Console.WriteLine("Writing event " + i + " of " + queuedEventCount);
                 WriteEventToFile(sw);
             }
             Console.WriteLine("StartQueueWorker() exited.");
@@ -118,7 +114,6 @@ namespace Spider
                 var data2 = data.Value;
                 foreach (var anEvent in data2)
                 {
-                    //Core.IncrementDoneCounter();
                     sw.WriteLine(JsonConvert.SerializeObject(anEvent));
                     Core.IncrementDoneCounter();
                 }
@@ -126,7 +121,7 @@ namespace Spider
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine("WriteToFile has been successfully cancelled.");
+                //Console.WriteLine("WriteToFile has been successfully cancelled.");
             }
         }
 
@@ -141,11 +136,9 @@ namespace Spider
             var secondsElapsed1 = secondsElapsed;
             var strongBox = new StrongBox<Dictionary<Message, double>>(new Dictionary<Message,
                 double> {{m1, secondsElapsed1}});
-
-            if (!CancelTokenGlobal.IsCancellationRequested)
-            {
                 _dataToWrite.Add(strongBox);
-            }
+            //Core.IncrementDoneCounter();
+            
         }
     }
 }
