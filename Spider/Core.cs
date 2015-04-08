@@ -28,26 +28,33 @@ namespace Spider
             new Dictionary<string, Dictionary<Task, CancellationTokenSource>>();
 
         private static int _doneCounter;
+        private static int _doneCounterCrawler;
         private static int TotalEvents => _doneCounter;
-
+        private static int TotalEventCrawler = _doneCounterCrawler;
         /// <summary>
         ///     Shows the event rate per minute.
         /// </summary>
         private static void ShowEventRatePerMinute()
         {
-            Console.Write("\r " + "Events/min: " + TotalEvents);
+            Console.Write("\r " + "Events/min: " + TotalEvents + " | " + TotalEventCrawler);
 
             ZeroDoneCounter();
         }
 
-        public static void IncrementDoneCounter()
+        public static void IncrementCrawlerCounter()
         {
-            Interlocked.Increment(ref _doneCounter);
+            Interlocked.Increment(ref _doneCounterCrawler);
+        }
+        public static void IncrementDoneCounter(bool crawler)
+        {
+            
+                Interlocked.Increment(ref _doneCounter);
         }
 
         private static void ZeroDoneCounter()
         {
             Interlocked.Exchange(ref _doneCounter, 0);
+            Interlocked.Exchange(ref _doneCounterCrawler, 0);
         }
 
         /// <summary>
@@ -76,13 +83,12 @@ namespace Spider
                 Logger.Log(LogPriority.Error, "The specified crawler could not be found.");
         }
 
-
         /// <summary>
-                    ///     Creates the crawler.
-                    /// </summary>
-                    /// <param name="roomKey">The room key.</param>
-                    /// <param name="createCrawlerHandle"></param>
-         public static  void CreateCrawler(string roomKey, AutoResetEvent createCrawlerHandle)
+        ///     Creates the crawler.
+        /// </summary>
+        /// <param name="roomKey">The room key.</param>
+        /// <param name="createCrawlerHandle"></param>
+        public static void CreateCrawler(string roomKey, AutoResetEvent createCrawlerHandle)
         {
             Logger.Log(LogPriority.Debug, "Initializing crawler...");
             var cancelToken = new CancellationTokenSource();
@@ -135,7 +141,7 @@ namespace Spider
             var listLobbyTask = Task.Run(() => { Lobby.List(); }, cancellationTokenSource.Token);
             listLobbyTask.Wait(cancellationTokenSource.Token);
             // auto fill/empty worker "pool"
-            var autoAdjustPoolTask = Task.Run(() => { Spider.Pool.AutoAdjust(); }, cancellationTokenSource.Token);
+            var autoAdjustPoolTask = Task.Run(() => { Pool.AutoAdjust(); }, cancellationTokenSource.Token);
             autoAdjustPoolTask.Wait(cancellationTokenSource.Token);
         }
 

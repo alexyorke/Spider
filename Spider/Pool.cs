@@ -26,7 +26,6 @@ namespace Spider
             }
             foreach (var room in Core.LobbyNew)
             {
-
                 if (room.Value >= MinimumUsers ||
                     (room.Key == "PWKK8zFHH8bEI" && room.Value > MinUsersFeatured) ||
                     (room.Key == "PWL2NjNOdhbEI" && room.Value > MinUsersFeatured) ||
@@ -40,8 +39,8 @@ namespace Spider
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(room.Key, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();
-                        await Task.Delay(3000); 
-                            //Thread.Sleep(3000); // if there is no delay, the clients will never initialize
+                        await Task.Delay(3000);
+                        //Thread.Sleep(3000); // if there is no delay, the clients will never initialize
                         // because PlayerIO rate limits new connections.
                         // This method should block.
                     }

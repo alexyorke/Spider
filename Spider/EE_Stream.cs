@@ -18,9 +18,6 @@ namespace Spider
     /// </summary>
     public class EeStream
     {
-        private readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
-        private readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
-
         private readonly BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
             new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
 
@@ -28,6 +25,9 @@ namespace Spider
         ///     The _RND
         /// </summary>
         private readonly Random _rnd = new Random();
+
+        private readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
+        private readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="EeStream" /> class.
@@ -115,7 +115,7 @@ namespace Spider
                 foreach (var anEvent in data2)
                 {
                     sw.WriteLine(JsonConvert.SerializeObject(anEvent));
-                    Core.IncrementDoneCounter();
+                    Core.IncrementDoneCounter(false);
                 }
                 //_dataToWrite.Dispose();
             }
@@ -136,9 +136,8 @@ namespace Spider
             var secondsElapsed1 = secondsElapsed;
             var strongBox = new StrongBox<Dictionary<Message, double>>(new Dictionary<Message,
                 double> {{m1, secondsElapsed1}});
-                _dataToWrite.Add(strongBox);
+            _dataToWrite.Add(strongBox);
             //Core.IncrementDoneCounter();
-            
         }
     }
 }
