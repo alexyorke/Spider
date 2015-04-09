@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,14 +26,11 @@ namespace Spider
                 await Task.Delay(250);
             }
 
+            var featuredWorlds = new List<string> { "PWKK8zFHH8bEI", "PWL2NjNOdhbEI", "PWbnzNQNi4a0I", "PWAIjKWOiLbEI" };
             foreach (var room in Core.LobbyNew)
             {
-                if (room.Value >= MinimumUsers ||
-                    (room.Key == "PWKK8zFHH8bEI" && room.Value > MinUsersFeatured) ||
-                    (room.Key == "PWL2NjNOdhbEI" && room.Value > MinUsersFeatured) ||
-                    (room.Key == "PWbnzNQNi4a0I" && room.Value > MinUsersFeatured) ||
-                    (room.Key == "PWAIjKWOiLbEI")) // tutorial room
-                    // 200 lava minigames, super mario bros (featured), coin level (featured)
+                if (room.Value >= MinimumUsers || (featuredWorlds.Contains(room.Key) && room.Value > MinUsersFeatured) ||
+                    (room.Key.StartsWith("OW")))
                 {
                     if (!Core.CrawlerTasks.ContainsKey(room.Key) || Core.CrawlerTasks.Count == 0)
                     {
@@ -40,17 +38,30 @@ namespace Spider
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(room.Key, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();
-                        await Task.Delay(3000);
-                        //Thread.Sleep(3000); // if there is no delay, the clients will never initialize
-                        // because PlayerIO rate limits new connections.
-                        // This method should block.
+                        await Task.Delay(3000); // if there is no delay, the crawler will never initialize.
                     }
                 }
                 else
                 {
-                    if (Core.CrawlerTasks.ContainsKey(room.Key) && (room.Value < (MinimumUsers - Buffer)))
+                    // the crawler tasks must contain the room key (required)
+                    // either one of the following conditions must exist:
+                    // (1) the amount of users in the room is less than or equal to the minimum users
+                    // minus the buffer amount AND it is NOT an open world or
+                    // (2) the amount of users in the room is more than one (including me), AND
+                    // must be an open world.
+
+                    // The reason why open worlds are crawled when there is only one user (me) is
+                    // because open worlds can have the same ids, and so when compiling the data the
+                    // similar ids can be mixed up, causing some of the data to be duplicated for another
+                    // completely unrelated level. When there is only one user left (me) the world disappears
+                    // and the session state is not preserved. If another world of the same id appears,
+                    // I can be very confident that it is a different session and a different world.
+
+                    if (Core.CrawlerTasks.ContainsKey(room.Key) &&
+                        (room.Value < (MinimumUsers - Buffer) && !room.Key.StartsWith("OW")) ||
+                        (room.Value <= 1 && room.Key.StartsWith("OW"))
+                        )
                     {
-                        // add a bit of a buffer so that there aren't too many fragments
                         Logger.Log(LogPriority.Debug, "Removing a crawler");
                         Core.RemoveCrawler(room.Key);
                     }

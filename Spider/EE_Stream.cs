@@ -26,8 +26,8 @@ namespace Spider
         /// </summary>
         private readonly Random _rnd = new Random();
 
-        private readonly CancellationTokenSource CancelTokenGlobal = new CancellationTokenSource();
-        private readonly string FilePath = GetFolderPath(SpecialFolder.Desktop);
+        private readonly CancellationTokenSource _cancelTokenGlobal = new CancellationTokenSource();
+        private readonly string _filePath = GetFolderPath(SpecialFolder.Desktop);
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="EeStream" /> class.
@@ -35,7 +35,6 @@ namespace Spider
         /// <param name="worldId">The world identifier.</param>
         public EeStream(string worldId)
         {
-            GarbageCollectCounter = 1;
             var currentDate = DateTime.Now.ToString("yyyy-M-d");
 
             // random string from stackoverflow
@@ -47,14 +46,14 @@ namespace Spider
             var uniqueString = result;
             // make directory
 
-            Directory.CreateDirectory(string.Format(FilePath + @"/spider_levels/{0}_{1}", currentDate,
+            Directory.CreateDirectory(string.Format(_filePath + @"/spider_levels/{0}_{1}", currentDate,
                 uniqueString));
             Logger.Log(LogPriority.Debug,
-                "Writing to: " + string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
+                "Writing to: " + string.Format(_filePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId));
 
             var fs = new FileStream(
-                string.Format(FilePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
+                string.Format(_filePath + @"/spider_levels/{0}_{1}/{2}", currentDate, uniqueString,
                     worldId), FileMode.Append, FileAccess.Write);
 
             var sw = new StreamWriter(fs);
@@ -66,15 +65,13 @@ namespace Spider
                     {"date_started", DateTime.Now.ToString(CultureInfo.InvariantCulture)}
                 }));
             Console.WriteLine("Event stream has initialized");
-            Task.Run(() => StartQueueWorker(sw), CancelTokenGlobal.Token);
+            Task.Run(() => StartQueueWorker(sw), _cancelTokenGlobal.Token);
         }
 
-        private int GarbageCollectCounter { get; set; }
-
-        public void revokeCancellationToken()
+        public void RevokeCancellationToken()
         {
             Console.WriteLine("cancellation token revoked");
-            CancelTokenGlobal.Cancel();
+            _cancelTokenGlobal.Cancel();
         }
 
         private void StartQueueWorker(StreamWriter sw)
@@ -83,7 +80,7 @@ namespace Spider
             {
                 WriteEventToFile(sw);
 
-                if (CancelTokenGlobal.Token.IsCancellationRequested)
+                if (_cancelTokenGlobal.Token.IsCancellationRequested)
                 {
                     // stop the loop
                     Console.WriteLine("Ending worker writer...");
@@ -109,19 +106,18 @@ namespace Spider
         {
             try
             {
-                var data = _dataToWrite.Take(CancelTokenGlobal.Token);
+                var data = _dataToWrite.Take(_cancelTokenGlobal.Token);
 
                 var data2 = data.Value;
                 foreach (var anEvent in data2)
                 {
                     sw.WriteLine(JsonConvert.SerializeObject(anEvent));
-                    Core.IncrementDoneCounter(false);
+                    Core.IncrementDoneCounter();
                 }
                 //_dataToWrite.Dispose();
             }
             catch (OperationCanceledException)
             {
-                //Console.WriteLine("WriteToFile has been successfully cancelled.");
             }
         }
 
@@ -137,7 +133,6 @@ namespace Spider
             var strongBox = new StrongBox<Dictionary<Message, double>>(new Dictionary<Message,
                 double> {{m1, secondsElapsed1}});
             _dataToWrite.Add(strongBox);
-            //Core.IncrementDoneCounter();
         }
     }
 }

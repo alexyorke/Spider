@@ -17,11 +17,10 @@ namespace Spider
         public static void List()
         {
             Core.LobbyNew = null;
-            var blackList =
-                "PWw5SwzgEXb0I\nPWjyTtlTPjbkI\nPWdBHWybO0a0I\nPWADSqksB-a0I\nPWAGTxuoOLa0I\nPW6tE27AhqbkI\nPWqEDKY7EDb0I\nPWZaOSj2GFbkI\nPW7huwlwUFbEI";
+            const string blackList = "PWw5SwzgEXb0I\nPWjyTtlTPjbkI\nPWdBHWybO0a0I\nPWADSqksB-a0I\nPWAGTxuoOLa0I\nPW6tE27AhqbkI\nPWqEDKY7EDb0I\nPWZaOSj2GFbkI\nPW7huwlwUFbEI";
             //[TC] goeyfun bot
             var waitForLobby = new AutoResetEvent(false);
-            //var connection = Core.Pool.GetObject();
+
             var connection = new Connect();
 
             var cli = connection.Client;
@@ -46,9 +45,6 @@ namespace Spider
                     }
                 }
 
-                // return client back to the cold, dark, pool.
-                //connection = null;
-                //Core.Pool.PutObject(connection);
                 waitForLobby.Set();
             });
             waitForLobby.WaitOne();

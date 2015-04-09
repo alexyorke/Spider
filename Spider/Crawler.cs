@@ -10,7 +10,7 @@ namespace Spider
         private MessageReceivedEventHandler _connOnMessageReceivedEventHandler;
         private CancellationToken _globalCancellationToken;
         private EeStream _globalStream;
-        private string worldIdGlobal;
+        private string _worldIdGlobal;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Crawler" /> class.
@@ -21,7 +21,7 @@ namespace Spider
             GlobalConnect = connection;
         }
 
-        public static bool HasNotReconnected { get; set; }
+        private static bool HasNotReconnected { get; set; }
 
         /// <summary>
         ///     Gets the client.
@@ -41,20 +41,16 @@ namespace Spider
         /// <value>The global connect.</value>
         private Connect GlobalConnect { get; }
 
-        public bool hasShown { get; private set; }
+        public bool HasShown { get; private set; }
 
         /// <summary>
         ///     Shutdowns the specified world identifier.
         /// </summary>
-        /// <param name="cancelToken">The cancel token.</param>
-        /// <param name="stream">The stream.</param>
-        private void Shutdown(CancellationToken cancelToken, EeStream stream)
+        private void Shutdown()
         {
             GlobalConnection.Disconnect();
-
-            //stream.CreateDoneFile();
             Client.Logout();
-            //myWaitEvent.Set();
+
         }
 
         /// <summary>
@@ -68,7 +64,7 @@ namespace Spider
             var eeEvent = new EeStream(worldId);
             _globalStream = eeEvent;
             _globalCancellationToken = cancelToken;
-            worldIdGlobal = worldId;
+            _worldIdGlobal = worldId;
             Client.Multiplayer.JoinRoom(worldId, null, // never create a new room. Ever!
                 delegate(Connection connection)
                 {
@@ -101,22 +97,16 @@ namespace Spider
                         Console.WriteLine("Is connected? " + connection.Connected);
                         GlobalConnection.OnMessage -= _connOnMessageReceivedEventHandler;
 
-                        ShouldShutdown(null, null, true);
+                        ShouldShutdown(true);
 
                         if (message.Contains("receivedBytes == 0"))
                         {
                             // client crashed
-                            if (reconnect && !HasNotReconnected)
-                            {
-                                /*Logger.Log(LogPriority.Debug, "Client crashed. Restarting crawler...");
-                                HasNotReconnected = true;
-                               Thread.Sleep(1000);
-                                Crawl(worldId, cancelToken); // reconnect once*/
-                            }
-                            else
+                            if (!reconnect || HasNotReconnected)
                             {
                                 Logger.Log(LogPriority.Warning, "Client reconnect attempts exceeded.");
                             }
+                            
                         }
                         else
                         {
@@ -144,27 +134,27 @@ namespace Spider
 
         private void IsCancellationRequested(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if (_globalCancellationToken.IsCancellationRequested && !hasShown)
+            if (_globalCancellationToken.IsCancellationRequested && !HasShown)
             {
-                Console.WriteLine("Cancellation requested for: " + worldIdGlobal);
-                hasShown = true;
+                Console.WriteLine("Cancellation requested for: " + _worldIdGlobal);
+                HasShown = true;
             }
         }
 
         private void ShouldShutdown(object sender, ElapsedEventArgs e)
         {
-            ShouldShutdown(null, null, false);
+            ShouldShutdown();
         }
 
-        private void ShouldShutdown(object sender, ElapsedEventArgs e, bool overrideCancel = false)
+        private void ShouldShutdown(bool overrideCancel = false)
         {
             if (_globalCancellationToken.IsCancellationRequested || overrideCancel)
             {
                 Console.WriteLine("[!!!] Unsubscribing message handler.");
                 _connOnMessageReceivedEventHandler = null;
                 Core.ATimer.Elapsed -= ShouldShutdown;
-                Shutdown(_globalCancellationToken, _globalStream);
-                _globalStream.revokeCancellationToken();
+                Shutdown();
+                _globalStream.RevokeCancellationToken();
 
                 Console.WriteLine("Finished shutting down.");
                 _globalCancellationToken.ThrowIfCancellationRequested();

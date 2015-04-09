@@ -30,26 +30,19 @@ namespace Spider
         private static int _doneCounter;
         private static int _doneCounterCrawler;
         private static int TotalEvents => _doneCounter;
-        private static int TotalEventCrawler = _doneCounterCrawler;
+        private static int _totalEventCrawler = _doneCounterCrawler;
         /// <summary>
         ///     Shows the event rate per minute.
         /// </summary>
         private static void ShowEventRatePerMinute()
         {
-            Console.Write("\r " + "Events/min: " + TotalEvents + " | " + TotalEventCrawler);
+            Console.Write("\r " + "Events/min: " + TotalEvents + " | " + _totalEventCrawler);
 
             ZeroDoneCounter();
         }
 
-        public static void IncrementCrawlerCounter()
-        {
-            Interlocked.Increment(ref _doneCounterCrawler);
-        }
-        public static void IncrementDoneCounter(bool crawler)
-        {
-            
-                Interlocked.Increment(ref _doneCounter);
-        }
+        public static void IncrementCrawlerCounter() => Interlocked.Increment(ref _doneCounterCrawler);
+        public static void IncrementDoneCounter() => Interlocked.Increment(ref _doneCounter);
 
         private static void ZeroDoneCounter()
         {
@@ -113,7 +106,7 @@ namespace Spider
             createCrawlerHandle.Set();
         }
 
-        private static void Shutdown(CancellationTokenSource cancellationTokenSource)
+        private static void Shutdown()
         {
             Logger.Log(LogPriority.Info, "Shutting down...");
             foreach (var crawler in CrawlerTasks)
@@ -168,7 +161,7 @@ namespace Spider
             if (info.Key == ConsoleKey.Q)
             {
                 Console.WriteLine("Recieved shutdown signal from console.");
-                Shutdown(cancellationTokenSource);
+                Shutdown();
             }
         }
 
