@@ -1,4 +1,5 @@
 ﻿using System;
+using NodaTime;
 
 namespace Spider
 {
@@ -24,13 +25,18 @@ namespace Spider
             }
         }
 
+        private static string GetDate()
+        {
+            return SystemClock.Instance.GetCurrentInstant().InUtc().ToInstant().ToString();
+        }
         /// <summary>
         ///     Logs the specified message.
         /// </summary>
         /// <param name="message">The message.</param>
         public static void Log(string message)
         {
-            Console.WriteLine(ToFriendlyString(LogPriority.Debug) + message);
+
+            Console.WriteLine("[" + GetDate() + "] " + ToFriendlyString(LogPriority.Debug) + message);
         }
 
         /// <summary>
@@ -40,7 +46,7 @@ namespace Spider
         /// <param name="message">The message.</param>
         public static void Log(LogPriority priority, string message)
         {
-            Console.WriteLine(ToFriendlyString(priority) + message);
+            Console.WriteLine("[" + GetDate() + "] " + GetDate() + ToFriendlyString(priority) + message);
             //Core.ShowEventRatePerMinute (false);
         }
     }
