@@ -160,7 +160,6 @@ namespace Spider
             var info = Console.ReadKey();
             if (info.Key == ConsoleKey.Q)
             {
-                Console.WriteLine("Recieved shutdown signal from console.");
                 Shutdown();
             }
         }

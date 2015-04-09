@@ -92,9 +92,7 @@ namespace Spider
 
                     GlobalConnection.OnDisconnect += delegate(object sender2, string message)
                     {
-                        Console.WriteLine("Recieved message to disconnect: " + message);
-                        Console.WriteLine("Cancellation token has been revoked? " + cancelToken.IsCancellationRequested);
-                        Console.WriteLine("Is connected? " + connection.Connected);
+                        Logger.Log(LogPriority.Debug,"Recieved message to disconnect: " + message);
                         GlobalConnection.OnMessage -= _connOnMessageReceivedEventHandler;
 
                         ShouldShutdown(true);
@@ -136,7 +134,7 @@ namespace Spider
         {
             if (_globalCancellationToken.IsCancellationRequested && !HasShown)
             {
-                Console.WriteLine("Cancellation requested for: " + _worldIdGlobal);
+                Logger.Log(LogPriority.Debug,"Cancellation requested for: " + _worldIdGlobal);
                 HasShown = true;
             }
         }
@@ -150,13 +148,12 @@ namespace Spider
         {
             if (_globalCancellationToken.IsCancellationRequested || overrideCancel)
             {
-                Console.WriteLine("[!!!] Unsubscribing message handler.");
                 _connOnMessageReceivedEventHandler = null;
                 Core.ATimer.Elapsed -= ShouldShutdown;
                 Shutdown();
                 _globalStream.RevokeCancellationToken();
 
-                Console.WriteLine("Finished shutting down.");
+                Logger.Log(LogPriority.Debug,"Finished shutting down.");
                 _globalCancellationToken.ThrowIfCancellationRequested();
             }
         }

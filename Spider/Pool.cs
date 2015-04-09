@@ -34,7 +34,6 @@ namespace Spider
                 {
                     if (!Core.CrawlerTasks.ContainsKey(room.Key) || Core.CrawlerTasks.Count == 0)
                     {
-                        Console.WriteLine("[IMP] Began to crawl a room: value: " + room.Value);
                         var createCrawlerHandle = new AutoResetEvent(false);
                         Core.CreateCrawler(room.Key, createCrawlerHandle);
                         createCrawlerHandle.WaitOne();

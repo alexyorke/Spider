@@ -64,13 +64,11 @@ namespace Spider
                 {
                     {"date_started", DateTime.Now.ToString(CultureInfo.InvariantCulture)}
                 }));
-            Console.WriteLine("Event stream has initialized");
             Task.Run(() => StartQueueWorker(sw), _cancelTokenGlobal.Token);
         }
 
         public void RevokeCancellationToken()
         {
-            Console.WriteLine("cancellation token revoked");
             _cancelTokenGlobal.Cancel();
         }
 
@@ -83,19 +81,17 @@ namespace Spider
                 if (_cancelTokenGlobal.Token.IsCancellationRequested)
                 {
                     // stop the loop
-                    Console.WriteLine("Ending worker writer...");
+                    Logger.Log(LogPriority.Debug,"Ending worker writer...");
                     break;
                 }
             }
             // finish up with rest of file
-            Console.WriteLine("Writing rest of queue... Please wait.");
+            Logger.Log(LogPriority.Debug,"Writing rest of queue... Please wait.");
             var queuedEventCount = _dataToWrite.Count;
             for (var i = 0; i <= queuedEventCount; i++)
             {
-                //Console.WriteLine("Writing event " + i + " of " + queuedEventCount);
                 WriteEventToFile(sw);
             }
-            Console.WriteLine("StartQueueWorker() exited.");
             //_dataToWrite.Dispose();
             sw.Flush();
             sw.Close();
