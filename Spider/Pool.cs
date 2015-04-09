@@ -22,8 +22,9 @@ namespace Spider
 
             while (Core.LobbyNew == null)
             {
-                Thread.Sleep(250);
+                await Task.Delay(250);
             }
+
             foreach (var room in Core.LobbyNew)
             {
                 if (room.Value >= MinimumUsers ||

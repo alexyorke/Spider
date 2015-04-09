@@ -159,11 +159,11 @@ namespace Spider
 
             Repeat.Interval(TimeSpan.FromMinutes(1), Lobby.List, cancellationTokenSource.Token);
             // replenish and remove stale crawlers every 7 minutes
-            Repeat.Interval(TimeSpan.FromMinutes(3), Pool.AutoAdjust, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMinutes(4), Pool.AutoAdjust, cancellationTokenSource.Token);
             // refresh the event counter every minute
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 
-            Repeat.Interval(TimeSpan.FromMilliseconds(500), GarbageCollect, cancellationTokenSource.Token);
+            Repeat.Interval(TimeSpan.FromMinutes(1), GarbageCollect, cancellationTokenSource.Token);
             var info = Console.ReadKey();
             if (info.Key == ConsoleKey.Q)
             {

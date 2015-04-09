@@ -16,6 +16,7 @@ namespace Spider
         /// </summary>
         public static void List()
         {
+            Core.LobbyNew = null;
             var blackList =
                 "PWw5SwzgEXb0I\nPWjyTtlTPjbkI\nPWdBHWybO0a0I\nPWADSqksB-a0I\nPWAGTxuoOLa0I\nPW6tE27AhqbkI\nPWqEDKY7EDb0I\nPWZaOSj2GFbkI\nPW7huwlwUFbEI";
             //[TC] goeyfun bot
