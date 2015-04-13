@@ -6,7 +6,7 @@ namespace Spider
     //http://stackoverflow.com/questions/7472013/how-to-create-a-thread-task-with-a-continuous-loop
 
     /// <summary>
-    ///     Class CancellationTokenExtensions.
+    /// Class CancellationTokenExtensions.
     /// </summary>
     internal static class CancellationTokenExtensions
     {

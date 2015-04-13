@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Environment;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -14,23 +13,32 @@ using PlayerIOClient;
 namespace Spider
 {
     /// <summary>
-    ///     Class EeStream.
+    /// Class EE Stream.
     /// </summary>
     public class EeStream
     {
+        /// <summary>
+        /// The data queue
+        /// </summary>
         private readonly BlockingCollection<StrongBox<Dictionary<Message, double>>> _dataToWrite =
             new BlockingCollection<StrongBox<Dictionary<Message, double>>>();
 
         /// <summary>
-        ///     The _RND
+        /// The random instance
         /// </summary>
         private readonly Random _rnd = new Random();
 
+        /// <summary>
+        /// The global cancellation token
+        /// </summary>
         private readonly CancellationTokenSource _cancelTokenGlobal = new CancellationTokenSource();
-        private readonly string _filePath = GetFolderPath(SpecialFolder.Desktop);
+        /// <summary>
+        /// The file path
+        /// </summary>
+        private readonly string _filePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="EeStream" /> class.
+        /// Initializes a new instance of the <see cref="EeStream" /> class.
         /// </summary>
         /// <param name="worldId">The world identifier.</param>
         public EeStream(string worldId)
@@ -67,11 +75,18 @@ namespace Spider
             Task.Run(() => StartQueueWorker(sw), _cancelTokenGlobal.Token);
         }
 
+        /// <summary>
+        /// Revokes the cancellation token.
+        /// </summary>
         public void RevokeCancellationToken()
         {
             _cancelTokenGlobal.Cancel();
         }
 
+        /// <summary>
+        /// Starts the queue worker.
+        /// </summary>
+        /// <param name="sw">The sw.</param>
         private void StartQueueWorker(StreamWriter sw)
         {
             while (true)
@@ -98,6 +113,10 @@ namespace Spider
             sw.Dispose();
         }
 
+        /// <summary>
+        /// Writes the event to file.
+        /// </summary>
+        /// <param name="sw">The sw.</param>
         private void WriteEventToFile(StreamWriter sw)
         {
             try
@@ -118,7 +137,7 @@ namespace Spider
         }
 
         /// <summary>
-        ///     Writes the specified m.
+        /// Writes the specified message to the queue.
         /// </summary>
         /// <param name="m">The m.</param>
         /// <param name="secondsElapsed">The seconds elapsed.</param>

@@ -11,7 +11,7 @@ namespace Spider
     internal static class Repeat
     {
         /// <summary>
-        ///     Intervals the specified poll interval.
+        ///     Interval for the specified poll interval.
         /// </summary>
         /// <param name="pollInterval">The poll interval.</param>
         /// <param name="action">The action.</param>

@@ -11,12 +11,12 @@ namespace Spider
     public class ObjectPool<T>
     {
         /// <summary>
-        ///     The _object generator
+        ///     The object generator
         /// </summary>
         private readonly Func<T> _objectGenerator;
 
         /// <summary>
-        ///     The _objects
+        ///     The objects
         /// </summary>
         private readonly ConcurrentBag<T> _objects;
 

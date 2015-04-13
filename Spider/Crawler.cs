@@ -1,19 +1,33 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Timers;
 using PlayerIOClient;
 
 namespace Spider
 {
+    /// <summary>
+    /// Class Crawler.
+    /// </summary>
     public class Crawler
     {
+        /// <summary>
+        /// The connection on message received event handler
+        /// </summary>
         private MessageReceivedEventHandler _connOnMessageReceivedEventHandler;
+        /// <summary>
+        /// The global cancellation token
+        /// </summary>
         private CancellationToken _globalCancellationToken;
+        /// <summary>
+        /// The global stream
+        /// </summary>
         private EeStream _globalStream;
+        /// <summary>
+        /// The global world id
+        /// </summary>
         private string _worldIdGlobal;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Crawler" /> class.
+        /// Initializes a new instance of the <see cref="Crawler" /> class.
         /// </summary>
         /// <param name="connection">The connection.</param>
         public Crawler(Connect connection)
@@ -21,10 +35,14 @@ namespace Spider
             GlobalConnect = connection;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance has not reconnected.
+        /// </summary>
+        /// <value><c>true</c> if this instance has not reconnected; otherwise, <c>false</c>.</value>
         private static bool HasNotReconnected { get; set; }
 
         /// <summary>
-        ///     Gets the client.
+        /// Gets the client.
         /// </summary>
         /// <value>The client.</value>
         private Client Client => GlobalConnect.Client;
@@ -41,10 +59,10 @@ namespace Spider
         /// <value>The global connect.</value>
         private Connect GlobalConnect { get; }
 
-        public bool HasShown { get; private set; }
+        private bool HasShown { get; set; }
 
         /// <summary>
-        ///     Shutdowns the specified world identifier.
+        ///     Stops the current crawler.
         /// </summary>
         private void Shutdown()
         {
@@ -54,7 +72,7 @@ namespace Spider
         }
 
         /// <summary>
-        ///     Crawls the specified world identifier.
+        ///     Crawls the specified world.
         /// </summary>
         /// <param name="worldId">The world identifier.</param>
         /// <param name="cancelToken">The cancel token.</param>

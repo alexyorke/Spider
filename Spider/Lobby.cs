@@ -6,13 +6,12 @@ using PlayerIOClient;
 namespace Spider
 {
     /// <summary>
-    ///     Class Lobby.
+    /// Class Lobby.
     /// </summary>
-    internal static class Lobby // this is the least maintainable class in the project, according
-        // to code metrics
+    internal static class Lobby
     {
         /// <summary>
-        ///     Lists the specified token.
+        /// Lists the specified token.
         /// </summary>
         public static void List()
         {

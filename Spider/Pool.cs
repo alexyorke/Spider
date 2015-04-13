@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,16 +5,25 @@ using System.Threading.Tasks;
 namespace Spider
 {
     /// <summary>
-    ///     Class Pool.
+    /// Class Pool.
     /// </summary>
     internal static class Pool
     {
+        /// <summary>
+        /// The minimum users in a featured world that the crawler will crawl.
+        /// </summary>
         private const int MinUsersFeatured = 3;
+        /// <summary>
+        /// The buffer amount. How many users should leave before the crawler leaves?
+        /// </summary>
         private const int Buffer = 0;
+        /// <summary>
+        /// The minimum amount of users needed in order to crawl in a normal room.
+        /// </summary>
         private const int MinimumUsers = 3;
 
         /// <summary>
-        ///     Automatics the adjust.
+        /// Adjust the crawler pool by checking whether the rooms have enough players.
         /// </summary>
         public static async void AutoAdjust()
         {
