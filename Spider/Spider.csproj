@@ -34,6 +34,9 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NodaTime">
+      <HintPath>..\packages\NodaTime.2.0.0-alpha20140808\lib\net35-Client\NodaTime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -58,7 +61,6 @@
     <Compile Include="Core.cs" />
     <Compile Include="Humanizer.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Priority.cs" />
     <Compile Include="LogPriority.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
