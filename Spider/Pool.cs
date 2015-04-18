@@ -20,7 +20,7 @@ namespace Spider
         /// <summary>
         /// The minimum amount of users needed in order to crawl in a normal room.
         /// </summary>
-        private const int MinimumUsers = 3;
+        private const int MinimumUsers = 5;
 
         /// <summary>
         /// Adjust the crawler pool by checking whether the rooms have enough players.
@@ -37,8 +37,7 @@ namespace Spider
             var featuredWorlds = new List<string> { "PWKK8zFHH8bEI", "PWL2NjNOdhbEI", "PWbnzNQNi4a0I", "PWAIjKWOiLbEI" };
             foreach (var room in Core.LobbyNew)
             {
-                if (room.Value >= MinimumUsers || (featuredWorlds.Contains(room.Key) && room.Value > MinUsersFeatured) ||
-                    (room.Key.StartsWith("OW")))
+                if ((room.Value >= MinimumUsers && !room.Key.StartsWith("OW")|| (featuredWorlds.Contains(room.Key) && room.Value > MinUsersFeatured)))
                 {
                     if (!Core.CrawlerTasks.ContainsKey(room.Key) || Core.CrawlerTasks.Count == 0)
                     {
@@ -65,8 +64,7 @@ namespace Spider
                     // I can be very confident that it is a different session and a different world.
 
                     if (Core.CrawlerTasks.ContainsKey(room.Key) &&
-                        (room.Value < (MinimumUsers - Buffer) && !room.Key.StartsWith("OW")) ||
-                        (room.Value <= 1 && room.Key.StartsWith("OW"))
+                        (room.Value < (MinimumUsers - Buffer))
                         )
                     {
                         Logger.Log(LogPriority.Debug, "Removing a crawler");
