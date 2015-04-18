@@ -50,18 +50,9 @@ namespace Spider
                 else
                 {
                     // the crawler tasks must contain the room key (required)
-                    // either one of the following conditions must exist:
                     // (1) the amount of users in the room is less than or equal to the minimum users
                     // minus the buffer amount AND it is NOT an open world or
-                    // (2) the amount of users in the room is more than one (including me), AND
-                    // must be an open world.
 
-                    // The reason why open worlds are crawled when there is only one user (me) is
-                    // because open worlds can have the same ids, and so when compiling the data the
-                    // similar ids can be mixed up, causing some of the data to be duplicated for another
-                    // completely unrelated level. When there is only one user left (me) the world disappears
-                    // and the session state is not preserved. If another world of the same id appears,
-                    // I can be very confident that it is a different session and a different world.
 
                     if (Core.CrawlerTasks.ContainsKey(room.Key) &&
                         (room.Value < (MinimumUsers - Buffer))
