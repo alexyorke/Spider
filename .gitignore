@@ -185,3 +185,5 @@ FakesAssemblies/
 Spider/Config.cs
 Spider/Config.cs
 *.diagsession
+Spider.sln.GhostDoc.xml
+Thumbs.db
