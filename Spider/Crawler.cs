@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Timers;
 using PlayerIOClient;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Spider
 {
@@ -115,6 +116,7 @@ namespace Spider
 
                         ShouldShutdown(true);
 
+                        if (Core.hasRebooted) { return; }
                         if (message.Contains("receivedBytes == 0"))
                         {
                             // client crashed
@@ -132,8 +134,24 @@ namespace Spider
                             }
                             else
                             {
-                                Logger.Log(LogPriority.Warning,
-                                    "Crawler " + worldId + " disconnected because " + message);
+                                if (message.Contains("IOException")) {
+                                    if (!Core.hasRebooted)
+                                    {
+                                        Core.hasRebooted = true;
+                                        Logger.Log(LogPriority.Error, "Internet disconnected. Trying to reconnect...");
+                                        while (!Core.checkForInternet())
+                                        {
+                                            Logger.Log(LogPriority.Info, "Waiting for connectivity...");
+                                            Thread.Sleep(5000);
+                                        }
+                                        Core.Restart();
+                                    }
+                                }
+                                else
+                                {
+                                    Logger.Log(LogPriority.Warning,
+                                        "Crawler " + worldId + " disconnected because " + message);
+                                }
                             }
                         }
                     };

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
@@ -31,6 +32,8 @@ namespace Spider
         private static int _doneCounterCrawler;
         private static int TotalEvents => _doneCounter;
         private static int _totalEventCrawler = _doneCounterCrawler;
+        internal static bool hasRebooted = false;
+
         /// <summary>
         ///     Shows the event rate per minute.
         /// </summary>
@@ -128,6 +131,16 @@ namespace Spider
             Logger.Log(LogPriority.Info, "Goodbye.");
         }
 
+        public static void Restart()
+        {
+            Shutdown();
+            Stopwatch.Stop();
+            Stopwatch.Reset();
+            CrawlerTasks.Clear();
+
+            hasRebooted = false;
+            StartApplication();
+        }
         private static void InitializeLobbyAndWorkers(CancellationTokenSource cancellationTokenSource)
         {
             // list lobby
@@ -143,6 +156,29 @@ namespace Spider
         /// </summary>
         /// <param name="args">The arguments.</param>
         public static void Main(string[] args)
+        {
+            StartApplication();
+        }
+
+        public static bool checkForInternet()
+        {
+            try
+            {
+                Ping myPing = new Ping();
+                String host = "google.com";
+                byte[] buffer = new byte[32];
+                int timeout = 4000;
+                PingOptions pingOptions = new PingOptions();
+                PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
+                return (reply.Status == IPStatus.Success);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static void StartApplication()
         {
             Stopwatch.Start();
             ATimer.Enabled = true;
