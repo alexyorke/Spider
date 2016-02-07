@@ -160,9 +160,15 @@ namespace Spider
         /// <param name="args">The arguments.</param>
         public static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            //mergeDLLintoEXE();
+            StartApplication();
+        }
+
+        /*private static void mergeDLLintoEXE()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args_) =>
             {
-                string resourceName = new AssemblyName(args.Name).Name + ".dll";
+                string resourceName = new AssemblyName(args_.Name).Name + ".dll";
                 string resource = Array.Find(this.GetType().Assembly.GetManifestResourceNames(), element => element.EndsWith(resourceName));
 
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource))
@@ -172,8 +178,7 @@ namespace Spider
                     return Assembly.Load(assemblyData);
                 }
             };
-            StartApplication();
-        }
+        }*/
 
         public static bool checkForInternet()
         {
