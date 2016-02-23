@@ -42,7 +42,7 @@ namespace Spider
         /// </summary>
         private static void ShowEventRatePerMinute()
         {
-            Console.Write("\r " + "Events/min: " + TotalEvents + " | " + _totalEventCrawler);
+            Console.Write("\r " + "Events/min: " + TotalEvents);
 
             ZeroDoneCounter();
         }
