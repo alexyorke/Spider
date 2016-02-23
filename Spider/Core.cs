@@ -196,10 +196,15 @@ namespace Spider
             Repeat.Interval(TimeSpan.FromMinutes(1), ShowEventRatePerMinute, cancellationTokenSource.Token);
 
             Repeat.Interval(TimeSpan.FromMinutes(1), GarbageCollect, cancellationTokenSource.Token);
-            var info = Console.ReadKey();
-            if (info.Key == ConsoleKey.Q)
+
+            // http://stackoverflow.com/questions/11647486/
+            ConsoleKeyInfo cki;
+            while (true)
             {
-                Shutdown();
+                cki = Console.ReadKey();
+                if (cki.Key == ConsoleKey.Q)
+                    Shutdown();
+                    break;
             }
         }
 
