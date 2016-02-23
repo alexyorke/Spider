@@ -70,7 +70,7 @@ namespace Spider
                 crawlerToBeRemoved.ElementAt(0).Value.Cancel();
                 try
                 {
-                    crawlerToBeRemoved.ElementAt(0).Key.Wait();
+                    crawlerToBeRemoved.ElementAt(0).Key.Wait(10000);
                     CrawlerTasks.Remove(roomKey);
                 }
                 catch (Exception e)
